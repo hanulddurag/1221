@@ -435,7 +435,7 @@
         options: [
           "총 2개의 단어로 이루어져 있다.",
           "총 4개의 형태소로 이루어져 있다.",
-          "'가'는 앞말과 분리되지 않는 형태소이다.",
+          "'가'는 앞말과 쉽게 분리되는 조사이다.",
           "'크다'는 2개의 형태소로 나눌 수 있다.",
           "'감나무'는 더 이상 나누면 본래 뜻이 사라지는 단일어이다."
         ],
@@ -446,11 +446,11 @@
         type: 'MULTIPLE',
         question: "다음 중 밑줄 친 부분이 &lt;보기&gt;의 조건에 모두 해당하는 것은?<br><br><div class='bg-indigo-50 border border-indigo-100 p-4 rounded-xl mt-2 text-sm font-normal text-slate-700'>&lt;보기&gt;<br>• 홀로 쓰일 수 있는 형태소인가? → 아니요<br>• 실질적인 의미가 있는 형태소인가? → 예</div>",
         options: [
-          "<u>하늘</u>이 매우 푸르다.",
-          "동생이 밥을 <u>먹</u>는다.",
-          "예쁜 꽃<u>이</u> 피었다.",
-          "철수가 도서관<u>에</u> 간다.",
-          "<u>우리</u>는 학교에 간다."
+          "우뚝 솟은 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>하늘</span>이 매우 푸르다.",
+          "욕심 많은 동생이 밥을 맛있게 <span class='border-b-4 border-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded font-bold text-indigo-700 shadow-sm'>먹</span>는다.",
+          "마당 한구석에 예쁜 꽃<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>이</span> 피었다.",
+          "늦은 오후에 철수가 도서관<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>에</span> 간다.",
+          "사랑하는 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>우리</span>는 같은 학교에 다닌다."
         ],
         answer: 1,
         explanation: "&lt;보기&gt;의 조건은 '의존 형태소'이면서 '실질 형태소'인 어간 등을 찾는 문제입니다. 동사의 어간인 '먹-'은 홀로 쓰일 수는 없지만 '먹다'라는 실질적인 의미를 가지고 있으므로 정답입니다."
@@ -737,4 +737,128 @@
         q.options.forEach((opt, idx) => {
           const btn = document.createElement('button');
           btn.className = "multiple-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all font-medium text-slate-700";
-          btn.innerHTML = `<div class="flex items-center justify-between"><span>
+          btn.innerHTML = `<div class="flex items-center justify-between"><span><strong class="mr-2 text-indigo-400">${idx+1}.</strong> ${opt}</span><span class="icon-placeholder"></span></div>`;
+          btn.onclick = () => submitQuizAnswer(idx, btn);
+          optionsContainer.appendChild(btn);
+        });
+
+      } else if (q.type === 'SHORT') {
+        // 단답형 입력 렌더링
+        optionsContainer.innerHTML = `
+          <div class="flex flex-col gap-3 mt-4">
+            <input type="text" id="short-answer-input" placeholder="정답을 입력하세요" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-4 w-full text-lg outline-none transition-colors" onkeypress="if(event.key === 'Enter') submitShortAnswer()" />
+            <button onclick="submitShortAnswer()" id="short-answer-btn" class="bg-indigo-100 text-indigo-700 font-bold py-4 rounded-xl hover:bg-indigo-200 transition-colors text-lg">정답 제출</button>
+          </div>
+        `;
+        // 포커스 주기
+        setTimeout(() => document.getElementById('short-answer-input').focus(), 10);
+      }
+      lucide.createIcons();
+    }
+
+    function submitShortAnswer() {
+      if(quizShowResult) return;
+      const inputEl = document.getElementById('short-answer-input');
+      const val = inputEl.value.trim();
+      if (!val) { alert("정답을 입력해 주세요!"); return; }
+      submitQuizAnswer(val, inputEl);
+    }
+
+    function submitQuizAnswer(userAnswer, targetElement) {
+      if (quizShowResult) return;
+      quizShowResult = true;
+      const q = QUIZ_QUESTIONS[quizCurrentQ];
+      
+      let isCorrect = false;
+
+      // 정답 체크 및 UI 스타일링
+      if (q.type === 'OX') {
+        isCorrect = (userAnswer === q.answer);
+        const buttons = document.querySelectorAll('.ox-btn');
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          if (btn.textContent === q.answer) {
+            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-emerald-500 bg-emerald-50 text-emerald-600";
+          } else if (btn.textContent === userAnswer && !isCorrect) {
+            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-rose-400 bg-rose-50 text-rose-500";
+          } else {
+            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-slate-100 opacity-30 text-slate-300";
+          }
+        });
+
+      } else if (q.type === 'MULTIPLE') {
+        isCorrect = (userAnswer === q.answer);
+        const buttons = document.querySelectorAll('.multiple-btn');
+        buttons.forEach((btn, idx) => {
+          btn.disabled = true;
+          const iconPlaceholder = btn.querySelector('.icon-placeholder');
+          if (idx === q.answer) {
+            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-bold border-emerald-500 bg-emerald-50 text-emerald-800";
+            iconPlaceholder.innerHTML = '<i data-lucide="check-circle-2" class="text-emerald-500 w-6 h-6"></i>';
+          } else if (idx === userAnswer && !isCorrect) {
+            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-medium border-rose-400 bg-rose-50 text-rose-800";
+            iconPlaceholder.innerHTML = '<i data-lucide="x-circle" class="text-rose-500 w-6 h-6"></i>';
+          } else {
+            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-medium border-slate-200 opacity-50 text-slate-500";
+          }
+        });
+
+      } else if (q.type === 'SHORT') {
+        // 단답형 채점 (공백 제거 후 비교)
+        const cleanUser = userAnswer.replace(/\s/g, '');
+        const cleanAnswer = q.answer.replace(/\s/g, '');
+        isCorrect = (cleanUser === cleanAnswer);
+        
+        targetElement.disabled = true;
+        const btn = document.getElementById('short-answer-btn');
+        btn.disabled = true;
+
+        if (isCorrect) {
+          targetElement.className = "border-2 rounded-xl p-4 w-full text-lg outline-none font-bold bg-emerald-50 border-emerald-500 text-emerald-800";
+          btn.className = "bg-emerald-100 text-emerald-700 font-bold py-4 rounded-xl text-lg opacity-50";
+        } else {
+          targetElement.className = "border-2 rounded-xl p-4 w-full text-lg outline-none font-bold bg-rose-50 border-rose-400 text-rose-800 line-through";
+          btn.className = "bg-rose-100 text-rose-700 font-bold py-4 rounded-xl text-lg opacity-50";
+        }
+      }
+
+      if (isCorrect) quizScore += 1;
+      lucide.createIcons();
+
+      // 해설 노출
+      const feedbackEl = document.getElementById('quiz-feedback');
+      if (isCorrect) {
+        feedbackEl.innerHTML = '<i data-lucide="check-circle" class="text-emerald-500 w-6 h-6"></i> <span class="text-emerald-700">정답입니다!</span>';
+      } else {
+        let shortAnsText = q.type === 'SHORT' ? ` (정답: ${q.answer})` : '';
+        feedbackEl.innerHTML = `<i data-lucide="x-circle" class="text-rose-500 w-6 h-6"></i> <span class="text-rose-700">아쉽네요!${shortAnsText}</span>`;
+      }
+      document.getElementById('quiz-explanation-text').innerHTML = `<strong>💡 해설:</strong> ${q.explanation}`;
+      document.getElementById('quiz-explanation-box').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function nextQuestion() {
+      quizCurrentQ += 1;
+      if (quizCurrentQ >= QUIZ_QUESTIONS.length) {
+        // 모든 문제 풀이 완료
+        document.getElementById('quiz-main-screen').classList.add('hidden');
+        document.getElementById('result-student-info').textContent = `${studentInfo.grade}학년 ${studentInfo.classNum}반 ${studentInfo.num}번 ${studentInfo.name}`;
+        document.getElementById('total-questions-cnt').textContent = QUIZ_QUESTIONS.length;
+        document.getElementById('user-score').textContent = quizScore;
+        document.getElementById('quiz-score-card').classList.remove('hidden');
+      } else {
+        showQuizQuestion();
+      }
+    }
+
+    // 퀴즈 탭 첫 화면으로 완전히 리셋
+    function resetQuizToStart() {
+      document.getElementById('quiz-score-card').classList.add('hidden');
+      document.getElementById('quiz-intro-screen').classList.remove('hidden');
+      document.getElementById('stu-name').value = '';
+      document.getElementById('stu-num').value = '';
+    }
+  </script>
+</body>
+</html>
