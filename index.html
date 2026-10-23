@@ -1,934 +1,1115 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>1-2-2 (1) 단어의 짜임과 새말</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Tailwind 구성 -->
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3' }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-2-2 (1) 단어의 짜임과 새말</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 기본 폰트 크기를 키워 전체 글자를 일괄적으로 확대 (기본 16px -> 24px) */
+        html { font-size: 24px; } 
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-      }
-    }
-  </script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    .perspective { perspective: 1000px; }
-    .transform-style-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
+        .wrong-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+        /* Custom Scrollbar for word pool */
+        .word-pool-scroll::-webkit-scrollbar { width: 8px; }
+        .word-pool-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .word-pool-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .word-pool-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Tree Diagram CSS */
+        .tree-line-vertical { width: 2px; height: 24px; background-color: #cbd5e1; margin: 0 auto; }
+        .tree-branch-horizontal { border-top: 2px solid #cbd5e1; width: 100%; position: absolute; top: 0; left: 0; }
+        
+        /* Option Selection Styling */
+        .quiz-option input:checked + div { background-color: #e0e7ff; border-color: #6366f1; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen p-4 md:p-8">
+<body class="text-slate-800 antialiased min-h-screen pb-12">
 
-  <div class="max-w-4xl mx-auto">
-    <!-- 헤더 -->
-    <header class="mb-8 text-center">
-      <h1 class="text-3xl md:text-4xl font-bold text-indigo-700 mb-2">1-2-2 (1) 단어의 짜임과 새말</h1>
-      <p class="text-slate-500">단어가 만들어지는 원리와 재미있는 새말의 세계를 탐험해봐요!</p>
+    <header class="bg-blue-800 shadow-sm">
+        <!-- 제목: 왼쪽 정렬 (justify-start) 및 하단 구분선 추가 -->
+        <div class="w-[95%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-start border-b border-blue-700/50">
+            <h1 class="font-bold text-xl text-white tracking-tight">1-2-2 (1) 단어의 짜임과 새말</h1>
+        </div>
+        <!-- 네비게이션: 고정(sticky) 및 가운데 정렬 (justify-center) -->
+        <div class="sticky top-0 z-50 bg-blue-800 shadow-md">
+            <nav class="w-[95%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8 flex justify-center space-x-1 sm:space-x-4 overflow-x-auto py-3" id="nav-tabs">
+                <button onclick="switchTab('tab-concept')" class="tab-btn active px-4 py-2 text-sm font-semibold rounded-full bg-white text-blue-800 transition-colors whitespace-nowrap">형태소와 단어의 짜임</button>
+                <button onclick="switchTab('tab-neologism')" class="tab-btn px-4 py-2 text-sm font-medium rounded-full text-blue-100 hover:bg-blue-700 hover:text-white transition-colors whitespace-nowrap">새말의 형성</button>
+                <button onclick="switchTab('tab-game')" class="tab-btn px-4 py-2 text-sm font-medium rounded-full text-blue-100 hover:bg-blue-700 hover:text-white transition-colors whitespace-nowrap">단어 분류 게임</button>
+                <button onclick="switchTab('tab-quiz')" class="tab-btn px-4 py-2 text-sm font-medium rounded-full text-blue-100 hover:bg-blue-700 hover:text-white transition-colors whitespace-nowrap">형성평가</button>
+            </nav>
+        </div>
     </header>
 
-    <!-- 탭 내비게이션 -->
-    <div class="flex flex-wrap justify-center gap-2 mb-8 border-b-2 border-indigo-100 pb-4">
-      <button onclick="switchTab('형태소와단어')" id="tab-형태소와단어" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-indigo-600 text-white shadow-md transform scale-105">
-        <i data-lucide="book-open" class="w-4.5 h-4.5"></i> 형태소와 단어의 짜임
-      </button>
-      <button onclick="switchTab('새말')" id="tab-새말" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200">
-        <i data-lucide="lightbulb" class="w-4.5 h-4.5"></i> 새말의 형성
-      </button>
-      <button onclick="switchTab('어휘')" id="tab-어휘" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200">
-        <i data-lucide="layers" class="w-4.5 h-4.5"></i> 어휘 플래시카드
-      </button>
-      <button onclick="switchTab('분류')" id="tab-분류" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200">
-        <i data-lucide="puzzle" class="w-4.5 h-4.5"></i> 단어 분류 게임
-      </button>
-      <button onclick="switchTab('퀴즈')" id="tab-퀴즈" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200">
-        <i data-lucide="help-circle" class="w-4.5 h-4.5"></i> 형성 평가
-      </button>
-    </div>
+    <main class="w-[95%] lg:w-[80%] mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative">
 
-    <!-- 탭 콘텐츠 바디 -->
-    <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 min-h-[500px]">
-      
-      <!-- 1. 형태소와 단어의 짜임 탭 -->
-      <div id="content-형태소와단어" class="tab-content space-y-8 animate-fade-in">
-        <h2 class="text-2xl font-bold text-indigo-800 border-l-4 border-indigo-500 pl-3">단어와 형태소</h2>
-        <div class="flex flex-col gap-4">
-          <!-- 단어 정보 한 줄 배열 -->
-          <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
-            <h3 class="w-20 shrink-0 text-xl font-bold text-blue-800">단어</h3>
-            <p class="text-slate-700 font-medium flex-1 bg-white p-2 rounded-lg shadow-sm">
-              <strong>홀로 쓰일 수 있는 가장 작은 말의 단위</strong> <span class="text-sm text-slate-500 ml-2">(+ '조사' 포함)</span>
-            </p>
-            <div class="text-sm p-2 bg-blue-100/50 rounded-lg shrink-0 w-full md:w-auto">
-              <span class="font-bold text-blue-700">예시:</span> 책가방 / 이 / 무겁다
-            </div>
-          </div>
-          <!-- 형태소 정보 한 줄 배열 -->
-          <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-            <h3 class="w-20 shrink-0 text-xl font-bold text-emerald-800">형태소</h3>
-            <p class="text-slate-700 font-medium flex-1 bg-white p-2 rounded-lg shadow-sm">
-              <strong>뜻을 가진 가장 작은 말의 단위</strong> <span class="text-sm text-slate-500 ml-2">(더 쪼개면 뜻이 사라짐)</span>
-            </p>
-            <div class="text-sm p-2 bg-emerald-100/50 rounded-lg shrink-0 w-full md:w-auto">
-              <span class="font-bold text-emerald-700">예시:</span> 책 / 가방 / 이 / 무겁- / -다
-            </div>
-          </div>
-        </div>
-
-        <div class="border-t-2 border-slate-100 pt-8 mt-8">
-          <h2 class="text-2xl font-bold text-indigo-800 border-l-4 border-indigo-500 pl-3 mb-6">단어의 짜임 (구성)</h2>
-          <div class="flex flex-col gap-4 mb-6">
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-amber-50 p-4 rounded-xl border border-amber-200">
-              <h4 class="w-20 shrink-0 font-bold text-amber-800 text-lg">어근</h4>
-              <p class="text-sm text-slate-700 flex-1 bg-white p-2 rounded-lg shadow-sm"><strong>실질적인 의미</strong>를 나타내는 중심 부분</p>
-              <span class="inline-block bg-amber-100 px-3 py-2 rounded-lg text-amber-800 text-sm font-bold shrink-0 w-full md:w-auto">예: 나무꾼의 '나무'</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 bg-purple-50 p-4 rounded-xl border border-purple-200">
-              <h4 class="w-20 shrink-0 font-bold text-purple-800 text-lg">접사</h4>
-              <p class="text-sm text-slate-700 flex-1 bg-white p-2 rounded-lg shadow-sm">어근에 붙어 <strong>뜻을 제한하거나 더해주는</strong> 부분</p>
-              <span class="inline-block bg-purple-100 px-3 py-2 rounded-lg text-purple-800 text-sm font-bold shrink-0 w-full md:w-auto">예: 나무꾼의 '-꾼'</span>
-            </div>
-          </div>
-
-          <!-- 가로형 깔끔한 구조도 -->
-          <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center overflow-x-auto">
-            <h3 class="text-lg font-bold text-slate-700 mb-6 text-center">단어의 짜임</h3>
-            <div class="flex items-center justify-start min-w-[600px] py-4 pl-4 md:justify-center md:pl-0 text-left">
-              <div class="flex items-center">
-                <div class="bg-indigo-600 text-white font-bold px-6 py-3 rounded-full shadow-md z-10 shrink-0">단어</div>
-                <div class="w-8 border-t-2 border-indigo-300 shrink-0"></div>
-                
-                <div class="flex flex-col gap-8">
-                  <!-- 단일어 갈래 -->
-                  <div class="flex items-center relative">
-                    <div class="absolute left-0 top-1/2 -bottom-4 border-l-2 border-indigo-300"></div>
-                    <div class="w-8 border-t-2 border-indigo-300 shrink-0"></div>
-                    <div class="bg-blue-500 text-white font-bold px-5 py-2 rounded-lg shadow-md z-10 w-28 text-center shrink-0">단일어</div>
-                    <div class="ml-3 bg-white px-3 py-2 rounded-lg shadow-sm border border-slate-100 text-sm text-slate-600 shrink-0">
-                      <strong>어근 1개</strong>로 이루어진 단어<br/>(예: 밤, 하늘)
-                    </div>
-                  </div>
-
-                  <!-- 복합어 갈래 -->
-                  <div class="flex items-center relative">
-                    <div class="absolute left-0 -top-4 bottom-1/2 border-l-2 border-indigo-300"></div>
-                    <div class="w-8 border-t-2 border-indigo-300 shrink-0"></div>
-                    <div class="bg-rose-500 text-white font-bold px-5 py-2 rounded-lg shadow-md z-10 w-28 text-center shrink-0">복합어</div>
-                    <div class="w-8 border-t-2 border-rose-300 shrink-0"></div>
-
-                    <div class="flex flex-col gap-6">
-                      <!-- 합성어 -->
-                      <div class="flex items-center relative">
-                        <div class="absolute left-0 top-1/2 -bottom-3 border-l-2 border-rose-300"></div>
-                        <div class="w-8 border-t-2 border-rose-300 shrink-0"></div>
-                        <div class="bg-orange-500 text-white font-bold px-4 py-2 rounded-lg shadow-md z-10 w-24 text-center shrink-0">합성어</div>
-                        <div class="ml-3 bg-orange-50 px-3 py-2 rounded border border-orange-200 text-sm text-slate-600 shrink-0">
-                          <strong>어근 + 어근</strong><br/>(예: 밤+나무)
-                        </div>
-                      </div>
-                      <!-- 파생어 -->
-                      <div class="flex items-center relative">
-                        <div class="absolute left-0 -top-3 bottom-1/2 border-l-2 border-rose-300"></div>
-                        <div class="w-8 border-t-2 border-rose-300 shrink-0"></div>
-                        <div class="bg-pink-500 text-white font-bold px-4 py-2 rounded-lg shadow-md z-10 w-24 text-center shrink-0">파생어</div>
-                        <div class="ml-3 bg-pink-50 px-3 py-2 rounded border border-pink-200 text-sm text-slate-600 shrink-0">
-                          <strong>접사+어근 / 어근+접사</strong><br/>(예: 덧+신, 지우+개)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 2. 새말의 형성 탭 -->
-      <div id="content-새말" class="tab-content hidden space-y-8 animate-fade-in">
-        <h2 class="text-2xl font-bold text-indigo-800 border-l-4 border-indigo-500 pl-3">새말의 형성</h2>
-        
-        <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-100">
-          <h3 class="text-xl font-bold text-indigo-800 mb-2">새말의 뜻</h3>
-          <p class="text-slate-700 font-medium bg-white p-4 rounded-lg shadow-sm leading-relaxed">
-            새로운 사물이나 개념을 표현하려고 <strong>새로 만들어</strong> 사용하는 말<br/>
-            <span class="text-sm text-slate-500 mt-2 block">
-              * 외국어를 그대로 가져와서 사용하는 <strong>외래어</strong>나, 외래어를 우리말로 다듬은 <strong>순화어</strong>도 새말에 포함돼요!
-            </span>
-          </p>
-        </div>
-
-        <div>
-          <h3 class="text-xl font-bold text-slate-800 mb-4 border-b-2 border-slate-100 pb-2">새말을 만드는 방법</h3>
-          <div class="flex flex-col gap-4">
-            <!-- 1 기존의 단어 형성 방법 -->
-            <div class="bg-white p-5 rounded-xl border-2 border-orange-100 shadow-sm">
-              <h4 class="font-bold text-lg text-orange-600 mb-3 flex items-center gap-2">
-                <span class="bg-orange-100 text-orange-800 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span>
-                기존의 단어 형성 방법
-              </h4>
-              <ul class="flex flex-col md:flex-row gap-3 text-sm text-slate-700">
-                <li class="flex-1 bg-orange-50 p-3 rounded-lg border border-orange-100">
-                  <strong class="text-orange-800 text-base block mb-1">합성의 방법 (어근+어근)</strong>
-                  <span class="text-slate-600">예) 그림말 (그림+말), 붕어빵 (붕어+빵)</span>
-                </li>
-                <li class="flex-1 bg-orange-50 p-3 rounded-lg border border-orange-100">
-                  <strong class="text-orange-800 text-base block mb-1">파생의 방법 (어근과 접사의 결합)</strong>
-                  <span class="text-slate-600 leading-relaxed block mt-1">
-                    • <strong>접사 + 어근:</strong> 햇밤 (햇- + 밤)<br/>
-                    • <strong>어근 + 접사:</strong> 누리꾼 (누리 + -꾼)
-                  </span>
-                </li>
-              </ul>
-            </div>
-
-            <!-- 2 새로운 단어 형성 방법 -->
-            <div class="bg-white p-5 rounded-xl border-2 border-pink-100 shadow-sm">
-              <h4 class="font-bold text-lg text-pink-600 mb-3 flex items-center gap-2">
-                <span class="bg-pink-100 text-pink-800 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
-                새로운 단어 형성 방법
-              </h4>
-              <ul class="flex flex-col md:flex-row gap-3 text-sm text-slate-700">
-                <li class="flex-1 bg-pink-50 p-3 rounded-lg border border-pink-100">
-                  <strong class="text-pink-800 text-base block mb-1">단어의 첫 글자를 결합</strong>
-                  <span class="text-slate-600">예) 소확행 (소소하지만 확실한 행복)</span>
-                </li>
-                <li class="flex-1 bg-pink-50 p-3 rounded-lg border border-pink-100">
-                  <strong class="text-pink-800 text-base block mb-1">단어의 일부를 따서 결합</strong>
-                  <span class="text-slate-600">예) 아점 (아침+점심), 라볶이 (라면+떡볶이)</span>
-                </li>
-              </ul>
-            </div>
-
-            <!-- 3 외래어 및 순화어 -->
-            <div class="bg-white p-5 rounded-xl border-2 border-emerald-100 shadow-sm">
-              <h4 class="font-bold text-lg text-emerald-600 mb-3 flex items-center gap-2">
-                <span class="bg-emerald-100 text-emerald-800 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
-                외래어 도입 및 우리말 순화
-              </h4>
-              <div class="flex flex-col md:flex-row gap-3 text-sm text-slate-700">
-                <div class="flex-1 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                  <strong class="text-emerald-800 text-base block mb-1">외래어 그대로 사용</strong>
-                  <span class="text-slate-600">예) 와이파이(Wi-Fi), 햄버거(hamburger)</span>
-                </div>
-                <div class="flex-1 bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                  <strong class="text-emerald-800 text-base block mb-1">외래어를 우리말로 순화</strong>
-                  <span class="text-slate-600">예) 네티즌 → 누리꾼, 패스트푸드 → 즉석 음식</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 3. 어휘 플래시카드 탭 -->
-      <div id="content-어휘" class="tab-content hidden animate-fade-in">
-        <div class="text-center mb-8">
-          <h2 class="text-2xl font-bold text-indigo-800 mb-2">어휘 플래시카드</h2>
-          <p class="text-slate-500 text-base">카드를 클릭하면 단어의 뜻과 예시를 확인할 수 있습니다.</p>
-        </div>
-        <div id="flashcard-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <!-- 플래시카드는 JavaScript를 통해 채워집니다 -->
-        </div>
-      </div>
-
-      <!-- 4. 단어 분류 게임 탭 -->
-      <div id="content-분류" class="tab-content hidden flex flex-col items-center animate-fade-in h-full">
-        <h2 class="text-2xl font-bold text-indigo-800 mb-2">단어 분류 게임</h2>
-        <p id="sorting-message" class="font-bold mb-6 px-4 py-2 rounded-full bg-slate-100 text-indigo-600 transition-colors">
-          단어를 선택하고 알맞은 상자에 넣어주세요!
-        </p>
-
-        <!-- 게임 본체 영역 -->
-        <div id="sorting-game-body" class="w-full flex flex-col items-center">
-          <div class="w-full max-w-3xl mb-6 bg-indigo-50 rounded-xl p-4 border border-indigo-100 shadow-sm">
-            <div class="flex items-center gap-2 mb-2 text-indigo-800 font-bold">
-              <i data-lucide="help-circle" class="w-4.5 h-4.5"></i>
-              <span>단어 분류 예시 (힌트)</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-              <div class="bg-white p-3 rounded-lg border border-indigo-100">
-                <span class="font-bold text-blue-600 block mb-1">▶ 단일어 (어근 1개)</span>
-                바다, 하늘, 맑다, 가다
-              </div>
-              <div class="bg-white p-3 rounded-lg border border-indigo-100">
-                <span class="font-bold text-orange-600 block mb-1">▶ 합성어 (어근 + 어근)</span>
-                돌다리(돌+다리), 눈물(눈+물)
-              </div>
-              <div class="bg-white p-3 rounded-lg border border-indigo-100">
-                <span class="font-bold text-pink-600 block mb-1">▶ 파생어 (접사+어근 / 어근+접사)</span>
-                맨발(맨+발), 먹이(먹+이)
-              </div>
-            </div>
-          </div>
-
-          <div id="words-pool" class="flex flex-wrap justify-center gap-2 mb-10 p-4 bg-white rounded-xl shadow-inner border border-slate-200 max-h-56 overflow-y-auto w-full"></div>
-
-          <div class="grid grid-cols-3 gap-2 md:gap-6 w-full max-w-3xl">
-            <div onclick="handleBoxClick('단일')" class="flex flex-col border-4 border-dashed rounded-xl p-4 min-h-[220px] cursor-pointer transition-colors bg-blue-100 hover:bg-blue-200 border-blue-300">
-              <h3 class="text-xl font-bold text-center mb-4 pb-2 border-b-2 border-black/10 text-blue-800">단일어</h3>
-              <div id="box-단일" class="flex flex-col gap-2 flex-grow"></div>
-            </div>
-            <div onclick="handleBoxClick('합성')" class="flex flex-col border-4 border-dashed rounded-xl p-4 min-h-[220px] cursor-pointer transition-colors bg-orange-100 hover:bg-orange-200 border-orange-300">
-              <h3 class="text-xl font-bold text-center mb-4 pb-2 border-b-2 border-black/10 text-orange-800">합성어</h3>
-              <div id="box-합성" class="flex flex-col gap-2 flex-grow"></div>
-            </div>
-            <div onclick="handleBoxClick('파생')" class="flex flex-col border-4 border-dashed rounded-xl p-4 min-h-[220px] cursor-pointer transition-colors bg-pink-100 hover:bg-pink-200 border-pink-300">
-              <h3 class="text-xl font-bold text-center mb-4 pb-2 border-b-2 border-black/10 text-pink-800">파생어</h3>
-              <div id="box-파생" class="flex flex-col gap-2 flex-grow"></div>
-            </div>
-          </div>
-        </div>
-
-        <div id="game-complete-card" class="hidden text-center bg-emerald-50 p-8 rounded-2xl w-full max-w-lg border-2 border-emerald-200">
-          <span class="text-5xl mb-4 block">🏆</span>
-          <h3 class="text-2xl font-bold text-emerald-800 mb-2">모두 분류했습니다!</h3>
-          <p class="text-emerald-600 mb-6">단어의 짜임을 완벽하게 이해하셨네요!</p>
-          <button onclick="resetGame()" class="flex items-center justify-center gap-2 mx-auto bg-emerald-600 text-white px-6 py-3 rounded-full font-bold hover:bg-emerald-700 transition-colors">
-            <i data-lucide="rotate-ccw" class="w-5 h-5"></i> 다시 하기
-          </button>
-        </div>
-      </div>
-
-      <!-- 5. 형성 평가 탭 -->
-      <div id="content-퀴즈" class="tab-content hidden max-w-2xl mx-auto animate-fade-in relative">
-        
-        <!-- 퀴즈 학생 정보 입력 화면 -->
-        <div id="quiz-intro-screen" class="bg-white border-2 border-indigo-100 rounded-2xl p-8 shadow-sm text-center">
-          <div class="inline-flex justify-center items-center bg-indigo-100 text-indigo-700 w-16 h-16 rounded-full mb-4">
-            <i data-lucide="user-check" class="w-8 h-8"></i>
-          </div>
-          <h3 class="text-2xl font-bold text-indigo-800 mb-2">형성 평가 시작하기</h3>
-          <p class="text-slate-500 mb-8">평가를 시작하기 전에 학생 정보를 입력해 주세요.</p>
-          
-          <div class="flex flex-col gap-4 max-w-xs mx-auto mb-8">
-            <div class="flex gap-2">
-              <input id="stu-grade" type="number" placeholder="학년" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 w-1/2 text-center outline-none transition-colors" min="1" max="6" />
-              <input id="stu-class" type="number" placeholder="반" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 w-1/2 text-center outline-none transition-colors" min="1" />
-            </div>
-            <input id="stu-num" type="number" placeholder="번호" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 w-full text-center outline-none transition-colors" min="1" />
-            <input id="stu-name" type="text" placeholder="이름" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-3 w-full text-center outline-none transition-colors" />
-            <p id="stu-error-msg" class="text-rose-500 text-sm hidden">모든 정보를 정확히 입력해 주세요.</p>
-          </div>
-          
-          <button onclick="startQuiz()" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-700 transition-colors shadow-md transform hover:scale-105 duration-200">
-            평가 시작
-          </button>
-        </div>
-
-        <!-- 퀴즈 문제 풀이 화면 -->
-        <div id="quiz-main-screen" class="hidden">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-indigo-800">형성 평가</h2>
-            <span id="quiz-progress" class="bg-indigo-100 text-indigo-800 px-4 py-1.5 rounded-full font-bold text-sm tracking-wide shadow-sm">
-              1 / 10
-            </span>
-          </div>
-
-          <div id="quiz-card" class="bg-white border-2 border-indigo-100 rounded-2xl p-6 shadow-sm mb-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-full -z-10"></div>
+        <section id="tab-concept" class="tab-content fade-in space-y-8 block">
             
-            <div class="flex gap-3 mb-6 items-start">
-              <span id="quiz-type-badge" class="shrink-0 bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded">5지선다</span>
-              <h3 id="quiz-question" class="text-xl font-bold text-slate-800 leading-relaxed">
-                <!-- 질문 들어감 -->
-              </h3>
-            </div>
-
-            <!-- 보기 또는 입력 컨테이너 -->
-            <div id="quiz-options-container" class="space-y-3">
-              <!-- JS에서 동적 생성 -->
-            </div>
-          </div>
-
-          <!-- 해설 결과 영역 -->
-          <div id="quiz-explanation-box" class="hidden animate-fade-in-up bg-slate-100 p-5 rounded-xl mb-6 border border-slate-200">
-            <p id="quiz-feedback" class="font-bold text-xl mb-2 flex items-center gap-2"></p>
-            <p id="quiz-explanation-text" class="text-slate-700 leading-relaxed bg-white p-3 rounded-lg border border-slate-200"></p>
-            <button onclick="nextQuestion()" class="mt-5 w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-md text-lg">
-              다음 문제로 넘어가기
-            </button>
-          </div>
-        </div>
-
-        <!-- 최종 점수 박스 -->
-        <div id="quiz-score-card" class="hidden flex flex-col items-center justify-center text-center py-12 animate-fade-in">
-          <div class="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mb-6 mx-auto">
-            <i data-lucide="award" class="w-12 h-12"></i>
-          </div>
-          <h2 class="text-3xl font-bold text-indigo-800 mb-2">평가 완료!</h2>
-          <p id="result-student-info" class="text-lg font-bold text-slate-500 mb-6 bg-slate-100 px-4 py-2 rounded-full inline-block">
-            <!-- 1학년 2반 3번 홍길동 -->
-          </p>
-          <div class="bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-8 mb-8 w-full max-w-sm">
-            <p class="text-slate-600 mb-2">최종 점수</p>
-            <p class="text-5xl font-black text-indigo-600 tracking-tighter">
-              <span id="user-score">0</span><span class="text-3xl text-indigo-300"> / <span id="total-questions-cnt">10</span></span>
-            </p>
-          </div>
-          <p id="sending-msg" class="text-indigo-600 font-bold mb-4 hidden">결과를 전송 중입니다...</p>
-          <button id="restart-btn" onclick="resetQuizToStart()" class="text-indigo-600 font-bold hover:bg-indigo-50 px-6 py-2 rounded-full transition-colors border-2 border-indigo-200">
-            처음부터 다시 하기
-          </button>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    // 외부 URL 통신이 아닌 구글 앱스 스크립트 전용 내부 통신을 사용합니다.
-    // --- 데이터 정의 ---
-    const VOCABULARY = [
-      { word: "단어", meaning: "홀로 쓰일 수 있는 가장 작은 말의 단위 (또는 그에 붙어 쉽게 분리되는 말)", example: "예) '책가방이 무겁다'에서 '책가방', '이', '무겁다'" },
-      { word: "형태소", meaning: "뜻을 가진 가장 작은 말의 단위", example: "예) '이야기책'은 '이야기'와 '책', 두 개의 형태소로 이루어짐" },
-      { word: "어근", meaning: "단어에서 실질적인 의미를 나타내는 형태소", example: "예) '덧신'의 '신', '나무꾼'의 '나무'" },
-      { word: "접사", meaning: "어근에 붙어서 그 뜻을 제한하거나 더해주는 형태소", example: "예) '덧신'의 '덧-', '나무꾼'의 '-꾼'" },
-      { word: "단일어", meaning: "하나의 어근으로 이루어진 단어", example: "예) 밤, 바다, 하늘, 맑다" },
-      { word: "복합어", meaning: "둘 이상의 형태소로 이루어진 단어 (합성어, 파생어)", example: "예) 돌다리, 눈물, 맨발, 지우개" },
-      { word: "합성어", meaning: "둘 이상의 어근으로 이루어진 단어", example: "예) 단어의 합성 과정을 살펴보면 의미를 짐작할 수 있다. (돌다리)" },
-      { word: "파생어", meaning: "어근과 접사로 이루어진 단어", example: "예) 새로운 단어는 파생의 방법으로 만들어지기도 한다. (풋사과)" },
-      { word: "새말", meaning: "새로운 사물이나 개념을 표현하려고 새로 만들어 사용하는 말", example: "예) 요즘 청소년은 새말을 많이 만들어 사용한다. (누리꾼, 아점)" },
-      { word: "자립성", meaning: "남에게 의지하지 않고 스스로 서려는 성질 (자립 형태소의 기준)", example: "예) '바다'는 자립성이 있지만, '넓-'은 자립성이 없다." },
-      { word: "외래어", meaning: "다른 나라의 말이 들어와서 우리말처럼 쓰이는 단어", example: "예) 와이파이, 햄버거, 컴퓨터, 스마트폰" },
-      { word: "국어", meaning: "한 나라의 사람들이 공통으로 사용하는 언어", example: "예) 우리나라의 국어는 '한국어'이다." }
-    ];
-
-    const SORTING_WORDS = [
-      { id: 1, word: "불국수", type: "합성", detail: "불(어근) + 국수(어근)" }, { id: 2, word: "꼬마김밥", type: "합성", detail: "꼬마(어근) + 김밥(어근)" }, { id: 3, word: "순대", type: "단일", detail: "어근 1개" }, { id: 4, word: "튀김", type: "파생", detail: "튀기-(어근) + -ㅁ(접사)" }, { id: 5, word: "종이", type: "단일", detail: "어근 1개" }, { id: 6, word: "손바닥", type: "합성", detail: "손(어근) + 바닥(어근)" }, { id: 7, word: "지우개", type: "파생", detail: "지우-(어근) + -개(접사)" }, { id: 8, word: "떠들다", type: "단일", detail: "떠들-(어근)" }, { id: 9, word: "앉았다", type: "단일", detail: "앉-(어근)" }, { id: 10, word: "가을", type: "단일", detail: "어근 1개" }, { id: 11, word: "바람", type: "단일", detail: "어근 1개" }, { id: 12, word: "차다", type: "단일", detail: "차-(어근)" }, { id: 13, word: "햇밤", type: "파생", detail: "햇-(접사) + 밤(어근)" }, { id: 14, word: "밤나무", type: "합성", detail: "밤(어근) + 나무(어근)" }, { id: 15, word: "밤송이", type: "합성", detail: "밤(어근) + 송이(어근)" }, { id: 16, word: "눈사람", type: "합성", detail: "눈(어근) + 사람(어근)" }, { id: 17, word: "우리", type: "단일", detail: "어근 1개" }, { id: 18, word: "한여름", type: "파생", detail: "한-(접사) + 여름(어근)" }, { id: 19, word: "금도끼", type: "합성", detail: "금(어근) + 도끼(어근)" }, { id: 20, word: "방귀쟁이", type: "파생", detail: "방귀(어근) + -쟁이(접사)" }, { id: 21, word: "나팔꽃", type: "합성", detail: "나팔(어근) + 꽃(어근)" }, { id: 22, word: "건너오다", type: "합성", detail: "건너-(어근) + 오-(어근)" }, { id: 23, word: "붓질", type: "파생", detail: "붓(어근) + -질(접사)" }, { id: 24, word: "망치질", type: "파생", detail: "망치(어근) + -질(접사)" }, { id: 25, word: "잔머리", type: "파생", detail: "잔-(접사) + 머리(어근)" }, { id: 26, word: "먹구름", type: "파생", detail: "먹-(접사) + 구름(어근)" }, { id: 27, word: "그림말", type: "합성", detail: "그림(어근) + 말(어근)" }
-    ];
-
-    // PDF 자료 반영 10문항
-    const QUIZ_QUESTIONS = [
-      {
-        type: 'OX',
-        question: "형태소는 홀로 쓰일 수 있는 가장 작은 말의 단위이다.",
-        answer: "X",
-        explanation: "홀로 쓰일 수 있는 가장 작은 말의 단위는 '단어'입니다. '형태소'는 뜻을 가진 가장 작은 말의 단위입니다."
-      },
-      {
-        type: 'OX',
-        question: "새로 생겨난 대상을 표현하기 위한 새말(신조어)의 제작은 언어의 낭비이므로, 가급적 새말을 만들지 않고 기존에 있던 단어들만을 엄격하게 제한하여 활용하는 태도가 올바르다.",
-        answer: "X",
-        explanation: "사회와 환경이 끊임없이 변화함에 따라 새로운 생각과 사물을 표현하기 위해 새말을 활발히 만들어 쓰는 것은 자연스럽고 창의적인 언어 활동입니다. 다만, 타인과의 소통을 방해하지 않는 선에서 적절히 사용하고, 순화해 나가는 균형 있는 태도가 중요합니다."
-      },
-      {
-        type: 'SHORT',
-        question: "'고기만두'는 실질적인 의미를 나타내는 중심 부분인 '고기'와 '만두'가 결합하여 만들어졌습니다. 이처럼 둘 이상의 어근이 결합하여 만들어진 단어를 무엇이라고 하나요?",
-        answer: "합성어",
-        explanation: "둘 이상의 어근이 결합하여 만들어진 단어는 '합성어'입니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "'감나무가 크다.'라는 문장에 대한 설명으로 알맞은 것은?",
-        options: [
-          "총 2개의 단어로 이루어져 있다.",
-          "총 4개의 형태소로 이루어져 있다.",
-          "'가'는 앞말과 쉽게 분리되는 조사이다.",
-          "'크다'는 2개의 형태소로 나눌 수 있다.",
-          "'감나무'는 더 이상 나누면 본래 뜻이 사라지는 단일어이다."
-        ],
-        answer: 3,
-        explanation: "'크다'는 뜻을 가진 가장 작은 단위인 '크-'와 '-다'라는 두 개의 형태소로 나눌 수 있습니다. 문장 전체의 단어는 3개, 형태소는 5개입니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "다음 중 밑줄 친 부분이 &lt;보기&gt;의 조건에 모두 해당하는 것은?<br><br><div class='bg-indigo-50 border border-indigo-100 p-4 rounded-xl mt-2 text-sm font-normal text-slate-700'>&lt;보기&gt;<br>• 홀로 쓰일 수 있는 형태소인가? → 아니요<br>• 실질적인 의미가 있는 형태소인가? → 예</div>",
-        options: [
-          "우뚝 솟은 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>하늘</span>이 매우 푸르다.",
-          "욕심 많은 동생이 밥을 맛있게 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>먹</span>는다.",
-          "마당 한구석에 예쁜 꽃<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>이</span> 피었다.",
-          "늦은 오후에 철수가 도서관<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>에</span> 간다.",
-          "사랑하는 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>우리</span>는 같은 학교에 다닌다."
-        ],
-        answer: 1,
-        explanation: "&lt;보기&gt;의 조건은 '의존 형태소'이면서 '실질 형태소'인 어간 등을 찾는 문제입니다. 동사의 어간인 '먹-'은 홀로 쓰일 수는 없지만 '먹다'라는 실질적인 의미를 가지고 있으므로 정답입니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "다음 단어들을 짜임에 따라 분류할 때, 그 연결이 바르지 않은 것은?",
-        options: [
-          "바다, 하늘 - 단일어",
-          "돌다리, 밤나무 - 합성어",
-          "풋사과, 군말 - 파생어",
-          "눈물, 그림말 - 합성어",
-          "지우개, 손바닥 - 파생어"
-        ],
-        answer: 4,
-        explanation: "'지우개'는 '지우-(어근) + -개(접사)'로 이루어진 파생어이지만, '손바닥'은 '손(어근) + 바닥(어근)'으로 이루어진 합성어입니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "다음 &lt;보기&gt;의 ㉠~㉤에 대한 설명으로 알맞지 않은 것은?<br><br><div class='bg-indigo-50 border border-indigo-100 p-4 rounded-xl mt-2 text-sm font-normal text-slate-700 flex flex-wrap justify-center gap-4'><span>㉠ 맨입</span><span>㉡ 덧신</span><span>㉢ 햇밤</span><span>㉣ 군말</span><span>㉤ 가위질</span></div>",
-        options: [
-          "㉠의 '맨-'은 '다른 것이 없는'의 뜻을 더하는 접사이다.",
-          "㉡의 '덧-'은 '거듭하여 입거나 신는'의 뜻을 더하는 접사이다.",
-          "㉢의 '햇-'은 '그해에 새로 난'의 뜻을 더하는 접사이다.",
-          "㉣의 '군-'은 '구워진'의 뜻을 더하는 접사이다.",
-          "㉤의 '-질'은 '그 도구를 가지고 하는 일'의 뜻을 더하는 접사이다."
-        ],
-        answer: 3,
-        explanation: "㉣ '군말'의 '군-'은 '쓸데없는'의 뜻을 더하는 접사입니다. '구워진'의 뜻이 아닙니다. (예: 군밤의 '군-'은 '구운'의 뜻을 지닌 어근입니다.)"
-      },
-      {
-        type: 'MULTIPLE',
-        question: "새말에 대한 설명으로 알맞지 않은 것은?",
-        options: [
-          "사회가 변화하면서 새로 생겨난 말이다.",
-          "기존의 단어 형성 방법(합성, 파생)으로 만들어지기도 한다.",
-          "단어의 첫 글자나 일부를 따서 만들기도 단다.",
-          "외래어는 우리말이 아니므로 새말에 포함되지 않는다.",
-          "외래어를 우리말로 다듬은 순화어도 새말에 속한다."
-        ],
-        answer: 3,
-        explanation: "새말에는 외국어를 그대로 가져와서 사용하는 '외래어'와 이를 다듬은 '순화어'가 모두 포함됩니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "새말 '아점(아침+점심)'과 가장 유사 단어 형성 방법으로 만들어진 단어는?",
-        options: [
-          "붕어빵",
-          "누리꾼",
-          "라볶이",
-          "그림말",
-          "즉석 음식"
-        ],
-        answer: 2,
-        explanation: "'아점'은 단어의 일부를 따서 결합하는 새로운 단어 형성 방법으로 만들어졌습니다. '라볶이(라면+떡볶이)'도 이와 같은 방법으로 만들어진 새말입니다."
-      },
-      {
-        type: 'MULTIPLE',
-        question: "밑줄 친 단어의 짜임이 나머지 넷과 다른 하나는?",
-        options: [
-          "매운 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>불국수</span>를 먹었다.",
-          "소풍 때 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>꼬마김밥</span>을 쌌다.",
-          "문자에 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>그림말</span>을 자주 쓴다.",
-          "튼튼한 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>돌다리</span>를 건넜다.",
-          "위기를 모면하려 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>잔머리</span>를 굴렸다."
-        ],
-        answer: 4,
-        explanation: "'잔머리(잔-+머리)'는 파생어이고, 나머지 불국수(불+국수), 꼬마김밥(꼬마+김밥), 그림말(그림+말), 돌다리(돌+다리)는 모두 두 어근이 결합한 합성어입니다."
-      }
-    ];
-
-    // --- 앱 상태 변수 ---
-    let currentTab = '형태소와단어';
-    
-    // 학생 정보
-    let studentInfo = { grade: '', classNum: '', num: '', name: '' };
-
-    // 분류 게임용 상태
-    let sortingWordsPool = [];
-    let selectedWordToSort = null;
-    let sortedCategories = { "단일": [], "합성": [], "파생": [] };
-
-    // 퀴즈용 상태
-    let quizCurrentQ = 0;
-    let quizShowResult = false;
-    let quizScore = 0;
-    let userResponses = []; // 사용자가 입력한 응답 기록
-
-    window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      initFlashcards();
-      initSortingGame();
-    });
-
-    // 탭 전환 시스템
-    function switchTab(tabId) {
-      currentTab = tabId;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = 'tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200';
-      });
-      const activeBtn = document.getElementById(`tab-${tabId}`);
-      if(activeBtn) {
-        activeBtn.className = 'tab-btn flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all duration-200 bg-indigo-600 text-white shadow-md transform scale-105';
-      }
-
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.add('hidden');
-      });
-      document.getElementById(`content-${tabId}`).classList.remove('hidden');
-    }
-
-    // --- 플래시카드 ---
-    function initFlashcards() {
-      const container = document.getElementById('flashcard-container');
-      container.innerHTML = '';
-      VOCABULARY.forEach((vocab, idx) => {
-        const cardWrapper = document.createElement('div');
-        cardWrapper.className = 'group perspective h-56 cursor-pointer';
-        cardWrapper.onclick = () => toggleCardFlip(idx);
-        cardWrapper.id = `vocab-card-${idx}`;
-
-        const getSplitSpans = (text) => text.split(' ').map(word => `<span class="inline-block whitespace-nowrap">${word}</span>`).join(' ');
-
-        cardWrapper.innerHTML = `
-          <div class="card-inner relative w-full h-full transition-transform duration-500 transform-style-3d">
-            <div class="absolute w-full h-full backface-hidden bg-white border-2 border-indigo-100 rounded-xl shadow-sm flex items-center justify-center p-4 hover:border-indigo-300 transition-colors">
-              <span class="text-4xl font-bold text-indigo-800">${vocab.word}</span>
-              <span class="absolute bottom-3 right-3 text-sm text-slate-400 flex items-center gap-1">클릭하여 뒤집기 <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i></span>
-            </div>
-            <div class="absolute w-full h-full backface-hidden bg-indigo-600 rotate-y-180 rounded-xl shadow-md flex flex-col items-center justify-center p-4 text-center text-white">
-              <div class="mb-3 w-full">
-                <div class="flex flex-wrap justify-center gap-x-1.5 gap-y-1 text-center text-lg md:text-xl font-semibold leading-snug">
-                  ${getSplitSpans(vocab.meaning)}
+            <div>
+                <div class="flex items-center mb-4">
+                    <div class="w-1.5 h-6 bg-indigo-600 rounded-full mr-2"></div>
+                    <h2 class="text-2xl font-bold text-indigo-900">단어와 형태소</h2>
                 </div>
-              </div>
-              ${vocab.example ? `
-                <div class="w-full mt-auto bg-indigo-800/40 p-2.5 rounded-lg border border-indigo-500/30 text-indigo-50">
-                  <div class="flex flex-wrap justify-center gap-x-1.5 gap-y-0.5 text-center text-sm leading-normal">
-                    ${getSplitSpans(vocab.example)}
-                  </div>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <span class="text-lg font-bold text-blue-800 min-w-[80px]">단어</span>
+                        <div class="flex-1 bg-white px-4 py-3 rounded-lg shadow-sm border border-blue-50">
+                            홀로 쓰일 수 있는 가장 작은 말의 단위 <span class="text-sm text-slate-500 ml-2">(+ '조사' 포함)</span>
+                        </div>
+                        <div class="bg-blue-100/50 px-4 py-3 rounded-lg text-sm text-blue-900">
+                            <span class="font-bold">예시:</span> 책가방 / 이 / 무겁다
+                        </div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <span class="text-lg font-bold text-emerald-800 min-w-[80px]">형태소</span>
+                        <div class="flex-1 bg-white px-4 py-3 rounded-lg shadow-sm border border-emerald-50">
+                            뜻을 가진 가장 작은 말의 단위 <span class="text-sm text-slate-500 ml-2">(더 쪼개면 뜻이 사라짐)</span>
+                        </div>
+                        <div class="bg-emerald-100/50 px-4 py-3 rounded-lg text-sm text-emerald-900">
+                            <span class="font-bold">예시:</span> 책 / 가방 / 이 / 무겁- / -다
+                        </div>
+                    </div>
                 </div>
-              ` : ''}
             </div>
-          </div>
-        `;
-        container.appendChild(cardWrapper);
-      });
-      lucide.createIcons();
-    }
 
-    function toggleCardFlip(idx) {
-      const inner = document.getElementById(`vocab-card-${idx}`).querySelector('.card-inner');
-      inner.classList.toggle('rotate-y-180');
-    }
+            <div class="pt-4">
+                <div class="flex items-center mb-4">
+                    <div class="w-1.5 h-6 bg-indigo-600 rounded-full mr-2"></div>
+                    <h2 class="text-2xl font-bold text-indigo-900">단어의 짜임 (구성)</h2>
+                </div>
+                <div class="space-y-4 mb-8">
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <span class="text-lg font-bold text-amber-800 min-w-[80px]">어근</span>
+                        <div class="flex-1 bg-white px-4 py-3 rounded-lg shadow-sm border border-amber-50">실질적인 의미를 나타내는 중심 부분</div>
+                        <div class="bg-amber-100/50 px-4 py-3 rounded-lg text-sm text-amber-900"><span class="font-bold">예:</span> 나무꾼의 '나무'</div>
+                    </div>
+                    <div class="bg-fuchsia-50 border border-fuchsia-100 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <span class="text-lg font-bold text-fuchsia-800 min-w-[80px]">접사</span>
+                        <div class="flex-1 bg-white px-4 py-3 rounded-lg shadow-sm border border-fuchsia-50">어근에 붙어 뜻을 제한하거나 더해주는 부분</div>
+                        <div class="bg-fuchsia-100/50 px-4 py-3 rounded-lg text-sm text-fuchsia-900"><span class="font-bold">예:</span> 나무꾼의 '-꾼'</div>
+                    </div>
+                </div>
 
-    // --- 단어 분류 게임 ---
-    function initSortingGame() {
-      sortingWordsPool = [...SORTING_WORDS].sort(() => Math.random() - 0.5);
-      selectedWordToSort = null;
-      sortedCategories = { "단일": [], "합성": [], "파생": [] };
-      document.getElementById('sorting-game-body').classList.remove('hidden');
-      document.getElementById('game-complete-card').classList.add('hidden');
-      updateSortingMessage("단어를 선택하고 알맞은 상자에 넣어주세요!", "text-indigo-600");
-      renderWordsPool();
-      renderCategorizedBoxes();
-    }
-    function updateSortingMessage(msg, colorClass) {
-      const el = document.getElementById('sorting-message');
-      el.textContent = msg;
-      el.className = `font-bold mb-6 px-4 py-2 rounded-full bg-slate-100 ${colorClass} transition-colors`;
-    }
-    function renderWordsPool() {
-      const pool = document.getElementById('words-pool');
-      pool.innerHTML = '';
-      sortingWordsPool.forEach(word => {
-        const btn = document.createElement('button');
-        const isSelected = selectedWordToSort && selectedWordToSort.id === word.id;
-        btn.textContent = word.word;
-        btn.className = `text-lg font-bold px-4 py-2 rounded-lg shadow-sm transition-all transform ${isSelected ? 'bg-indigo-600 text-white scale-110 shadow-md ring-4 ring-indigo-200 z-10' : 'bg-white text-slate-700 hover:bg-indigo-50 border-2 border-slate-200'}`;
-        btn.onclick = (e) => { e.stopPropagation(); selectWordToSort(word); };
-        pool.appendChild(btn);
-      });
-    }
-    function renderCategorizedBoxes() {
-      ['단일', '합성', '파생'].forEach(category => {
-        const container = document.getElementById(`box-${category}`);
-        container.innerHTML = '';
-        sortedCategories[category].forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'bg-white/80 px-3 py-2 rounded text-sm text-center font-medium text-slate-800 shadow-sm flex flex-col relative group';
-          div.innerHTML = `<span class="text-base">${item.word}</span>${item.detail ? `<span class="text-xs text-slate-500 mt-1">${item.detail}</span>` : ''}`;
-          container.appendChild(div);
-        });
-      });
-    }
-    function selectWordToSort(word) {
-      selectedWordToSort = word;
-      updateSortingMessage(`'${word.word}' 선택됨! 어느 상자에 들어갈까요?`, "text-blue-600");
-      renderWordsPool();
-    }
-    function handleBoxClick(boxType) {
-      if (!selectedWordToSort) { updateSortingMessage("먼저 목록에서 단어를 하나 선택해 주세요.", "text-rose-500"); return; }
-      if (selectedWordToSort.type === boxType) {
-        sortedCategories[boxType].push(selectedWordToSort);
-        sortingWordsPool = sortingWordsPool.filter(w => w.id !== selectedWordToSort.id);
-        selectedWordToSort = null;
-        updateSortingMessage("정답입니다! 🎉", "text-emerald-600");
-        renderWordsPool(); renderCategorizedBoxes(); checkGameComplete();
-      } else {
-        updateSortingMessage(`아쉽네요! '${selectedWordToSort.word}'은(는) ${boxType}어가 아닙니다.`, "text-rose-500");
-        selectedWordToSort = null; renderWordsPool();
-      }
-    }
-    function checkGameComplete() {
-      if (sortingWordsPool.length === 0) {
-        document.getElementById('sorting-game-body').classList.add('hidden');
-        document.getElementById('game-complete-card').classList.remove('hidden');
-        updateSortingMessage("완벽하게 분류해 냈어요! 최고입니다!", "text-emerald-700");
-      }
-    }
-    function resetGame() { initSortingGame(); }
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 sm:p-10 flex flex-col items-center overflow-x-auto">
+                    <h3 class="text-lg font-bold text-slate-700 mb-8">단어의 짜임</h3>
+                    
+                    <!-- 가로형 수형도 (Tree Diagram) - 매끄러운 연결 구조 적용 -->
+                    <div class="flex justify-center font-sans min-w-max pb-4 overflow-visible">
+                        <div class="flex items-center">
+                            
+                            <!-- Level 1: 단어 -->
+                            <div class="bg-indigo-600 text-white font-bold px-8 py-3 rounded-full shadow-md text-lg z-10 relative">단어</div>
+                            
+                            <!-- Connector to Level 2 -->
+                            <div class="w-8 border-t-2 border-indigo-300"></div>
+                            
+                            <!-- Level 2 Container -->
+                            <div class="flex flex-col">
+                                
+                                <!-- 단일어 Row -->
+                                <div class="flex items-center relative py-6">
+                                    <!-- Vertical line: half top to bottom -->
+                                    <div class="absolute left-0 top-1/2 bottom-0 w-[2px] bg-indigo-300"></div>
+                                    <!-- Horizontal line -->
+                                    <div class="w-8 border-t-2 border-indigo-300 z-10"></div>
+                                    
+                                    <div class="bg-blue-500 text-white font-bold px-6 py-2 rounded-lg shadow-sm text-center min-w-[100px] z-10 relative">단일어</div>
+                                    <div class="ml-4 bg-white border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-600 shadow-sm flex items-center gap-3">
+                                        <div>어근 1개로 이루어진 단어</div>
+                                        <div class="bg-blue-50 text-blue-700 px-2 py-1 rounded">(예: 밤, 하늘)</div>
+                                    </div>
+                                </div>
 
+                                <!-- 복합어 Row -->
+                                <div class="flex items-center relative py-6">
+                                    <!-- Vertical line: top to half -->
+                                    <div class="absolute left-0 top-0 bottom-1/2 w-[2px] bg-indigo-300"></div>
+                                    <!-- Horizontal line -->
+                                    <div class="w-8 border-t-2 border-indigo-300 z-10"></div>
+                                    
+                                    <div class="bg-rose-500 text-white font-bold px-6 py-2 rounded-lg shadow-sm text-center min-w-[100px] z-10 relative">복합어</div>
+                                    
+                                    <!-- Connector to Level 3 -->
+                                    <div class="w-8 border-t-2 border-rose-300"></div>
+                                    
+                                    <!-- Level 3 Container -->
+                                    <div class="flex flex-col">
+                                        
+                                        <!-- 합성어 Row -->
+                                        <div class="flex items-center relative py-4">
+                                            <!-- Vertical line: half top to bottom -->
+                                            <div class="absolute left-0 top-1/2 bottom-0 w-[2px] bg-rose-300"></div>
+                                            <!-- Horizontal line -->
+                                            <div class="w-8 border-t-2 border-rose-300 z-10"></div>
+                                            
+                                            <div class="bg-orange-500 text-white font-bold px-6 py-2 rounded-lg shadow-sm text-center min-w-[100px] z-10 relative">합성어</div>
+                                            <div class="ml-4 bg-orange-50 border border-orange-200 px-4 py-2.5 rounded-lg text-sm text-slate-600 shadow-sm flex items-center gap-3">
+                                                <div>어근 + 어근</div>
+                                                <div class="bg-white text-orange-700 px-2 py-1 rounded border border-orange-100">(예: 밤+나무)</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 파생어 Row -->
+                                        <div class="flex items-center relative py-4">
+                                            <!-- Vertical line: top to half -->
+                                            <div class="absolute left-0 top-0 bottom-1/2 w-[2px] bg-rose-300"></div>
+                                            <!-- Horizontal line -->
+                                            <div class="w-8 border-t-2 border-rose-300 z-10"></div>
+                                            
+                                            <div class="bg-pink-500 text-white font-bold px-6 py-2 rounded-lg shadow-sm text-center min-w-[100px] z-10 relative">파생어</div>
+                                            <div class="ml-4 bg-pink-50 border border-pink-200 px-4 py-2.5 rounded-lg text-sm text-slate-600 shadow-sm flex items-center gap-3">
+                                                <div>접사+어근 / 어근+접사</div>
+                                                <div class="bg-white text-pink-700 px-2 py-1 rounded border border-pink-100">(예: 덧+신, 지우+개)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    // --- 퀴즈(형성 평가) 영역 ---
-    function startQuiz() {
-      const g = document.getElementById('stu-grade').value.trim();
-      const c = document.getElementById('stu-class').value.trim();
-      const n = document.getElementById('stu-num').value.trim();
-      const name = document.getElementById('stu-name').value.trim();
+        <section id="tab-neologism" class="tab-content fade-in hidden space-y-8">
+            <div>
+                <div class="flex items-center mb-4">
+                    <div class="w-1.5 h-6 bg-indigo-600 rounded-full mr-2"></div>
+                    <h2 class="text-2xl font-bold text-indigo-900">새말의 뜻</h2>
+                </div>
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-6">
+                    <div class="bg-white rounded-lg p-5 shadow-sm border border-indigo-50">
+                        <p class="text-lg text-slate-800">새로운 사물이나 개념을 표현하려고 <span class="font-bold text-indigo-700">새로 만들어</span> 사용하는 말</p>
+                        <p class="text-sm text-slate-500 mt-2">* 외국어를 그대로 가져와서 사용하는 외래어나, 외래어를 우리말로 다듬은 순화어도 새말에 포함돼요!</p>
+                    </div>
+                </div>
+            </div>
 
-      if (!g || !c || !n || !name) {
-        document.getElementById('stu-error-msg').classList.remove('hidden');
-        return;
-      }
-      document.getElementById('stu-error-msg').classList.add('hidden');
-      studentInfo = { grade: g, classNum: c, num: n, name: name };
+            <div>
+                <h3 class="text-xl font-bold text-slate-800 mb-4">새말을 만드는 방법</h3>
+                <div class="space-y-6">
+                    
+                    <!-- Method 1 -->
+                    <div class="border border-orange-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm">1</div>
+                            <h4 class="font-bold text-orange-600 text-lg">기존의 단어 형성 방법</h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-orange-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">합성의 방법 (어근+어근)</p>
+                                <p class="text-sm text-slate-600">예) 그림말 (그림+말), 붕어빵 (붕어+빵)</p>
+                            </div>
+                            <div class="bg-orange-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">파생의 방법 (어근과 접사의 결합)</p>
+                                <ul class="text-sm text-slate-600 list-disc list-inside">
+                                    <li>접사 + 어근: 햇밤 (햇- + 밤)</li>
+                                    <li>어근 + 접사: 누리꾼 (누리 + -꾼)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
 
-      document.getElementById('quiz-intro-screen').classList.add('hidden');
-      document.getElementById('quiz-main-screen').classList.remove('hidden');
-      
-      quizCurrentQ = 0;
-      quizScore = 0;
-      userResponses = []; // 응답 기록 초기화
-      showQuizQuestion();
-    }
+                    <!-- Method 2 -->
+                    <div class="border border-pink-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-sm">2</div>
+                            <h4 class="font-bold text-pink-600 text-lg">새로운 단어 형성 방법</h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-pink-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">단어의 첫 글자를 결합</p>
+                                <p class="text-sm text-slate-600">예) 소확행 (소소하지만 확실한 행복)</p>
+                            </div>
+                            <div class="bg-pink-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">단어의 일부를 따서 결합</p>
+                                <p class="text-sm text-slate-600">예) 아점 (아침+점심), 라볶이 (라면+떡볶이)</p>
+                            </div>
+                        </div>
+                    </div>
 
-    function showQuizQuestion() {
-      quizShowResult = false;
-      const q = QUIZ_QUESTIONS[quizCurrentQ];
-      
-      document.getElementById('quiz-progress').textContent = `${quizCurrentQ + 1} / ${QUIZ_QUESTIONS.length}`;
-      document.getElementById('quiz-question').innerHTML = q.question;
-      
-      // 문제 유형 배지 표시
-      const typeBadge = document.getElementById('quiz-type-badge');
-      if (q.type === 'OX') {
-        typeBadge.textContent = 'OX 퀴즈';
-        typeBadge.className = 'shrink-0 bg-purple-100 text-purple-700 text-sm font-bold px-3 py-1 rounded';
-      } else if (q.type === 'SHORT') {
-        typeBadge.textContent = '단답형';
-        typeBadge.className = 'shrink-0 bg-amber-100 text-amber-700 text-sm font-bold px-3 py-1 rounded';
-      } else {
-        typeBadge.textContent = '5지선다';
-        typeBadge.className = 'shrink-0 bg-blue-100 text-blue-700 text-sm font-bold px-3 py-1 rounded';
-      }
+                    <!-- Method 3 -->
+                    <div class="border border-emerald-200 rounded-2xl p-6 bg-white shadow-sm">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">3</div>
+                            <h4 class="font-bold text-emerald-600 text-lg">외래어 도입 및 우리말 순화</h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-emerald-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">외래어 그대로 사용</p>
+                                <p class="text-sm text-slate-600">예) 와이파이(Wi-Fi), 햄버거(hamburger)</p>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-4">
+                                <p class="font-bold text-slate-700 mb-2">외래어를 우리말로 순화</p>
+                                <p class="text-sm text-slate-600">예) 네티즌 → 누리꾼, 패스트푸드 → 즉석 음식</p>
+                            </div>
+                        </div>
+                    </div>
 
-      const optionsContainer = document.getElementById('quiz-options-container');
-      optionsContainer.innerHTML = '';
-      document.getElementById('quiz-explanation-box').classList.add('hidden');
+                </div>
+            </div>
+        </section>
 
-      if (q.type === 'OX') {
-        // OX 버튼 렌더링
-        const flexDiv = document.createElement('div');
-        flexDiv.className = "flex gap-4 w-full";
-        ['O', 'X'].forEach(opt => {
-          const btn = document.createElement('button');
-          btn.className = "flex-1 text-center py-8 rounded-2xl border-4 border-slate-100 hover:border-indigo-300 hover:bg-indigo-50 transition-all font-black text-6xl text-slate-400 ox-btn";
-          btn.textContent = opt;
-          btn.onclick = () => submitQuizAnswer(opt, btn);
-          flexDiv.appendChild(btn);
-        });
-        optionsContainer.appendChild(flexDiv);
+        <section id="tab-game" class="tab-content fade-in hidden">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-indigo-900 mb-2">단어 분류 게임</h2>
+                <div id="game-desc" class="inline-block bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full text-sm font-medium">단어를 선택하고 알맞은 상자를 터치(클릭)해주세요!</div>
+            </div>
 
-      } else if (q.type === 'MULTIPLE') {
-        // 5지선다 버튼 렌더링
-        q.options.forEach((opt, idx) => {
-          const btn = document.createElement('button');
-          btn.className = "multiple-btn w-full text-left p-4 rounded-xl border-2 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all font-medium text-slate-700";
-          btn.innerHTML = `<div class="flex items-center justify-between"><span><strong class="mr-2 text-indigo-400">${idx+1}.</strong> ${opt}</span><span class="icon-placeholder"></span></div>`;
-          btn.onclick = () => submitQuizAnswer(idx, btn);
-          optionsContainer.appendChild(btn);
-        });
+            <div class="flex flex-wrap justify-center gap-3 mb-6">
+                <button onclick="loadGameSet(1)" id="btn-set-1" class="game-set-btn px-5 py-2 rounded-full font-bold text-sm transition-all bg-indigo-600 text-white shadow-md">세트 1 (짜임)</button>
+                <button onclick="loadGameSet(2)" id="btn-set-2" class="game-set-btn px-5 py-2 rounded-full font-bold text-sm transition-all bg-white text-slate-500 border border-slate-200 hover:bg-slate-50">세트 2 (짜임)</button>
+                <button onclick="loadGameSet(3)" id="btn-set-3" class="game-set-btn px-5 py-2 rounded-full font-bold text-sm transition-all bg-white text-slate-500 border border-slate-200 hover:bg-slate-50">세트 3 (짜임)</button>
+                <button onclick="loadGameSet(4)" id="btn-set-4" class="game-set-btn px-5 py-2 rounded-full font-bold text-sm transition-all bg-white text-slate-500 border border-slate-200 hover:bg-slate-50">세트 4 (문장)</button>
+                <button onclick="loadGameSet(5)" id="btn-set-5" class="game-set-btn px-5 py-2 rounded-full font-bold text-sm transition-all bg-white text-slate-500 border border-slate-200 hover:bg-slate-50">세트 5 (문장)</button>
+            </div>
 
-      } else if (q.type === 'SHORT') {
-        // 단답형 입력 렌더링
-        optionsContainer.innerHTML = `
-          <div class="flex flex-col gap-3 mt-4">
-            <input type="text" id="short-answer-input" placeholder="정답을 입력하세요" class="border-2 border-slate-200 focus:border-indigo-500 rounded-xl p-4 w-full text-lg outline-none transition-colors" onkeypress="if(event.key === 'Enter') submitShortAnswer()" />
-            <button onclick="submitShortAnswer()" id="short-answer-btn" class="bg-indigo-100 text-indigo-700 font-bold py-4 rounded-xl hover:bg-indigo-200 transition-colors text-lg">정답 제출</button>
-          </div>
-        `;
-        // 포커스 주기
-        setTimeout(() => document.getElementById('short-answer-input').focus(), 10);
-      }
-      lucide.createIcons();
-    }
+            <!-- Mode 1: 기존 단어 짜임 분류 게임 -->
+            <div id="game-mode-word">
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 sm:p-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-3 shadow-sm text-sm">
+                            <p class="font-bold text-blue-600 mb-1">▶ 단일어 (어근 1개)</p>
+                            <p class="text-slate-600">바다, 하늘, 맑다, 가다</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm text-sm">
+                            <p class="font-bold text-orange-600 mb-1">▶ 합성어 (어근 + 어근)</p>
+                            <p class="text-slate-600">돌다리(돌+다리), 눈물(눈+물)</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 shadow-sm text-sm">
+                            <p class="font-bold text-pink-600 mb-1">▶ 파생어 <span class="text-xs font-normal">(접사+어근 / 어근+접사)</span></p>
+                            <p class="text-slate-600">지우개, 풋사과, 맨발</p>
+                        </div>
+                    </div>
+                </div>
 
-    function submitShortAnswer() {
-      if(quizShowResult) return;
-      const inputEl = document.getElementById('short-answer-input');
-      const val = inputEl.value.trim();
-      if (!val) { alert("정답을 입력해 주세요!"); return; }
-      submitQuizAnswer(val, inputEl);
-    }
+                <!-- Word Pool Area -->
+                <div class="bg-white border border-slate-200 shadow-sm rounded-xl p-4 mb-6">
+                    <div class="text-sm font-bold text-slate-500 mb-3 text-center">단어 풀 (아래 단어를 먼저 선택하세요)</div>
+                    <div id="word-pool" class="flex flex-wrap gap-2 justify-center items-center min-h-[120px] max-h-60 overflow-y-auto word-pool-scroll p-2"></div>
+                </div>
 
-    function submitQuizAnswer(userAnswer, targetElement) {
-      if (quizShowResult) return;
-      quizShowResult = true;
-      const q = QUIZ_QUESTIONS[quizCurrentQ];
-      
-      let isCorrect = false;
-      let recordedAnswer = "";
+                <!-- Target Category Boxes -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div onclick="targetCategoryBox('단일어', this)" class="bg-blue-50 border-2 border-dashed border-blue-400 rounded-xl p-4 min-h-[200px] cursor-pointer transition-all hover:bg-blue-100/50">
+                        <h3 class="text-center font-bold text-blue-700 text-lg mb-3 pb-2 border-b border-blue-200">단일어</h3>
+                        <div class="word-container flex flex-wrap gap-2 content-start"></div>
+                    </div>
+                    <div onclick="targetCategoryBox('합성어', this)" class="bg-orange-50 border-2 border-dashed border-orange-400 rounded-xl p-4 min-h-[200px] cursor-pointer transition-all hover:bg-orange-100/50">
+                        <h3 class="text-center font-bold text-orange-700 text-lg mb-3 pb-2 border-b border-orange-200">합성어</h3>
+                        <div class="word-container flex flex-wrap gap-2 content-start"></div>
+                    </div>
+                    <div onclick="targetCategoryBox('파생어', this)" class="bg-pink-50 border-2 border-dashed border-pink-400 rounded-xl p-4 min-h-[200px] cursor-pointer transition-all hover:bg-pink-100/50">
+                        <h3 class="text-center font-bold text-pink-700 text-lg mb-3 pb-2 border-b border-pink-200">파생어</h3>
+                        <div class="word-container flex flex-wrap gap-2 content-start"></div>
+                    </div>
+                </div>
+            </div>
 
-      // 정답 체크 및 UI 스타일링
-      if (q.type === 'OX') {
-        isCorrect = (userAnswer === q.answer);
-        recordedAnswer = userAnswer;
-        
-        const buttons = document.querySelectorAll('.ox-btn');
-        buttons.forEach(btn => {
-          btn.disabled = true;
-          if (btn.textContent === q.answer) {
-            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-emerald-500 bg-emerald-50 text-emerald-600";
-          } else if (btn.textContent === userAnswer && !isCorrect) {
-            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-rose-400 bg-rose-50 text-rose-500";
-          } else {
-            btn.className = "flex-1 text-center py-8 rounded-2xl border-4 transition-all font-black text-6xl border-slate-100 opacity-30 text-slate-300";
-          }
-        });
+            <!-- Mode 2: 새로운 문장 분해 게임 (세트 4, 5) 직접 입력 방식 -->
+            <div id="game-mode-sentence" class="hidden">
+                <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 sm:p-6 mb-6 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-indigo-900" id="sg-sentence-counter">문장 1 / 5</h3>
+                        <span class="bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">단어 및 형태소 나누기</span>
+                    </div>
+                    <div class="text-center py-6">
+                        <p class="text-2xl sm:text-3xl font-black text-slate-800 tracking-wide" id="sg-target-sentence">나는 밥을 먹었다.</p>
+                        <p class="text-sm font-medium text-indigo-600 mt-4 bg-indigo-100/50 inline-block px-4 py-1.5 rounded-full">빈칸에 알맞은 단어와 형태소를 직접 입력해보세요.</p>
+                    </div>
+                </div>
 
-      } else if (q.type === 'MULTIPLE') {
-        isCorrect = (userAnswer === q.answer);
-        recordedAnswer = (userAnswer + 1).toString(); // 사용자가 고른 보기 번호 (1~5)
+                <div class="flex flex-col gap-6 mb-6">
+                    <!-- Words Box -->
+                    <div class="bg-white border-2 border-indigo-200 shadow-sm rounded-xl p-5" id="sg-word-box">
+                         <h4 class="font-bold text-indigo-800 mb-4 flex items-center gap-2"><span class="bg-indigo-100 text-indigo-700 w-6 h-6 rounded-full flex items-center justify-center text-sm">1</span> 단어로 나누기</h4>
+                         <div id="sg-word-inputs" class="flex flex-wrap gap-2 justify-center mb-4 min-h-[40px]">
+                             <!-- Generated inputs -->
+                         </div>
+                         <button id="btn-check-words" onclick="checkWords()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-colors">확인</button>
+                         <p id="sg-word-feedback" class="h-5 mt-2 transition-all"></p>
+                    </div>
+                    
+                    <!-- Morphemes Box -->
+                    <div class="bg-white border-2 border-pink-200 shadow-sm rounded-xl p-5 opacity-50 pointer-events-none transition-opacity" id="sg-morpheme-box">
+                         <h4 class="font-bold text-pink-800 mb-4 flex items-center gap-2"><span class="bg-pink-100 text-pink-700 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span> 형태소로 나누기</h4>
+                         <p class="text-xs text-slate-500 mb-3 text-center">* 접사나 어미의 경우 하이픈(-)을 함께 적어주세요. (예: 먹-, -었-, -다)</p>
+                         <div id="sg-morpheme-inputs" class="flex flex-wrap gap-2 justify-center mb-4 min-h-[40px]">
+                             <!-- Generated inputs -->
+                         </div>
+                         <button id="btn-check-morphemes" onclick="checkMorphemes()" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 rounded-lg transition-colors">확인</button>
+                         <p id="sg-morpheme-feedback" class="h-5 mt-2 transition-all"></p>
+                    </div>
+                </div>
+            </div>
 
-        const buttons = document.querySelectorAll('.multiple-btn');
-        buttons.forEach((btn, idx) => {
-          btn.disabled = true;
-          const iconPlaceholder = btn.querySelector('.icon-placeholder');
-          if (idx === q.answer) {
-            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-bold border-emerald-500 bg-emerald-50 text-emerald-800";
-            iconPlaceholder.innerHTML = '<i data-lucide="check-circle-2" class="text-emerald-500 w-6 h-6"></i>';
-          } else if (idx === userAnswer && !isCorrect) {
-            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-medium border-rose-400 bg-rose-50 text-rose-800";
-            iconPlaceholder.innerHTML = '<i data-lucide="x-circle" class="text-rose-500 w-6 h-6"></i>';
-          } else {
-            btn.className = "w-full text-left p-4 rounded-xl border-2 transition-all font-medium border-slate-200 opacity-50 text-slate-500";
-          }
-        });
+            <!-- Game Complete Modal -->
+            <div id="game-complete-modal" class="hidden fixed inset-0 bg-slate-900/50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-xl transform transition-all scale-95 opacity-0 duration-300" id="game-modal-content">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">분류 완료!</h3>
+                    <p class="text-slate-500 mb-6">모든 단어를 알맞게 분류했습니다.</p>
+                    <button onclick="closeGameModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">확인</button>
+                </div>
+            </div>
+        </section>
 
-      } else if (q.type === 'SHORT') {
-        // 단답형 채점 (공백 제거 후 비교)
-        const cleanUser = userAnswer.replace(/\s/g, '');
-        const cleanAnswer = q.answer.replace(/\s/g, '');
-        isCorrect = (cleanUser === cleanAnswer);
-        recordedAnswer = userAnswer;
+        <section id="tab-quiz" class="tab-content fade-in hidden">
+            
+            <div id="quiz-intro">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-indigo-900 mb-2">형성평가</h2>
+                    <p class="text-slate-600">제출하기 전에 인적 사항을 정확히 입력해주세요.</p>
+                </div>
+                
+                <!-- Student Info Form -->
+                <div class="max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mb-8">
+                    <h3 class="font-bold text-slate-700 mb-4 border-b pb-2">인적 사항</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">학년</label>
+                            <input type="number" id="s-grade" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 p-2 border outline-none" min="1" max="6" placeholder="예: 1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">반</label>
+                            <input type="number" id="s-class" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 p-2 border outline-none" min="1" max="20" placeholder="예: 3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">번호</label>
+                            <input type="number" id="s-num" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 p-2 border outline-none" min="1" max="50" placeholder="예: 15">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">이름</label>
+                            <input type="text" id="s-name" class="w-full border-slate-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-slate-50 p-2 border outline-none" placeholder="홍길동">
+                        </div>
+                    </div>
+                    <div class="mt-6 text-center">
+                        <button onclick="startQuiz()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-sm">평가 시작하기</button>
+                    </div>
+                </div>
+            </div>
 
-        targetElement.disabled = true;
-        const btn = document.getElementById('short-answer-btn');
-        btn.disabled = true;
+            <!-- Quiz Container -->
+            <div id="quiz-main" class="hidden">
+                <div class="flex justify-between items-end mb-4 border-b border-slate-200 pb-2">
+                    <h3 class="text-xl font-bold text-slate-800">문제 풀이</h3>
+                    <span class="text-sm font-medium text-slate-500"><span id="quiz-progress-text">0</span> / 10 완료</span>
+                </div>
+                
+                <div id="quiz-questions-container" class="space-y-8 mb-8">
+                    <!-- Questions injected here by JS -->
+                </div>
 
-        if (isCorrect) {
-          targetElement.className = "border-2 rounded-xl p-4 w-full text-lg outline-none font-bold bg-emerald-50 border-emerald-500 text-emerald-800";
-          btn.className = "bg-emerald-100 text-emerald-700 font-bold py-4 rounded-xl text-lg opacity-50";
-        } else {
-          targetElement.className = "border-2 rounded-xl p-4 w-full text-lg outline-none font-bold bg-rose-50 border-rose-400 text-rose-800 line-through";
-          btn.className = "bg-rose-100 text-rose-700 font-bold py-4 rounded-xl text-lg opacity-50";
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8 text-sm text-blue-800 flex items-start gap-2">
+                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div>
+                        <p class="font-bold mb-1">구글 내부 연동(google.script.run) 안내</p>
+                        <p class="text-blue-700/80">이 페이지는 구글 앱스 스크립트 내부 통신을 사용합니다. 제출 시 별도의 외부 URL 없이 스프레드시트로 안전하게 결과가 자동 저장됩니다.</p>
+                    </div>
+                </div>
+
+                <button id="btn-submit-quiz" onclick="submitQuiz()" class="w-full bg-slate-300 text-slate-500 font-bold py-4 rounded-xl transition-all cursor-not-allowed" disabled>모든 문제를 풀면 제출할 수 있습니다</button>
+            </div>
+
+            <!-- Results Container -->
+            <div id="quiz-results" class="hidden max-w-3xl mx-auto">
+                <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center mb-8 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">평가 결과</h2>
+                    <p class="text-slate-500 mb-6" id="result-student-info">1학년 3반 15번 홍길동</p>
+                    <div class="text-6xl font-black text-indigo-600 mb-2"><span id="result-score">100</span><span class="text-2xl text-slate-400 ml-1">점</span></div>
+                    <p class="text-sm font-medium text-slate-400" id="result-message">수고하셨습니다! 오답을 확인해보세요.</p>
+                </div>
+
+                <h3 class="font-bold text-lg text-slate-800 mb-4 border-b pb-2">상세 채점 결과</h3>
+                <div id="quiz-review-container" class="space-y-4">
+                    <!-- Review injected here by JS -->
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="location.reload()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-8 rounded-xl transition-colors">처음으로 돌아가기</button>
+                </div>
+            </div>
+            
+        </section>
+
+    </main>
+
+    <script>
+        // Data Structures
+        const WORD_SETS = {
+            1: ["바다", "하늘", "눈물", "지우개", "나무", "돌다리", "풋사과", "구름", "밤나무", "맨발", "사람", "손바닥", "햇밤", "가다", "길가", "군말", "맑다", "불국수", "덮개", "밤", "꼬마김밥", "사냥꾼", "낮", "금도끼", "덧신", "물", "나팔꽃", "헛고생", "산기슭", "웃음"],
+            2: ["강", "꽃잎", "풋사랑", "산", "물병", "군살", "별", "책가방", "날고기", "꽃", "고무신", "들국화", "바람", "눈사람", "잠보", "높다", "앞치마", "멋쟁이", "먹다", "볶음밥", "장난꾸러기", "얼굴", "건너오다", "가위질", "마음", "뛰놀다", "믿음", "소리", "알아보다", "얼음"],
+            3: ["땅", "집안", "맨손", "불", "논밭", "시어머니", "새", "손발", "샛노랗다", "잎", "오르내리다", "짓밟다", "돌", "밤낮", "치솟다", "작다", "봄가을", "톱질", "자다", "소나무", "구경꾼", "기쁘다", "달빛", "선생님", "바위", "바닷가", "지붕", "모래", "국물", "놀이"]
+        };
+
+        const SENTENCE_SETS = {
+            4: [
+                { text: "하늘이 매우 맑다.", words: ["하늘", "이", "매우", "맑다"], morphemes: ["하늘", "이", "매우", "맑-", "-다"] },
+                { text: "동생이 사과를 먹었다.", words: ["동생", "이", "사과", "를", "먹었다"], morphemes: ["동생", "이", "사과", "를", "먹-", "-었-", "-다"] },
+                { text: "저기 높은 산이 있다.", words: ["저기", "높은", "산", "이", "있다"], morphemes: ["저기", "높-", "-은", "산", "이", "있-", "-다"] },
+                { text: "나는 예쁜 꽃을 보았다.", words: ["나", "는", "예쁜", "꽃", "을", "보았다"], morphemes: ["나", "는", "예쁘-", "-ㄴ", "꽃", "을", "보-", "-았-", "-다"] },
+                { text: "우리 가족은 바다로 간다.", words: ["우리", "가족", "은", "바다", "로", "간다"], morphemes: ["우리", "가족", "은", "바다", "로", "가-", "-ㄴ-", "-다"] }
+            ],
+            5: [
+                { text: "고양이가 쥐를 잡았다.", words: ["고양이", "가", "쥐", "를", "잡았다"], morphemes: ["고양이", "가", "쥐", "를", "잡-", "-았-", "-다"] },
+                { text: "맑은 물이 졸졸 흐른다.", words: ["맑은", "물", "이", "졸졸", "흐른다"], morphemes: ["맑-", "-은", "물", "이", "졸졸", "흐르-", "-ㄴ-", "-다"] },
+                { text: "철수는 새 신발을 신었다.", words: ["철수", "는", "새", "신발", "을", "신었다"], morphemes: ["철수", "는", "새", "신발", "을", "신-", "-었-", "-다"] },
+                { text: "봄비가 조용히 내린다.", words: ["봄비", "가", "조용히", "내린다"], morphemes: ["봄", "비", "가", "조용", "-히", "내리-", "-ㄴ-", "-다"] },
+                { text: "친구와 함께 학교에 간다.", words: ["친구", "와", "함께", "학교", "에", "간다"], morphemes: ["친구", "와", "함께", "학교", "에", "가-", "-ㄴ-", "-다"] }
+            ]
+        };
+
+        const WORD_DICTIONARY = {
+            "바다": "단일어", "하늘": "단일어", "나무": "단일어", "구름": "단일어", "사람": "단일어", "가다": "단일어", "맑다": "단일어", "밤": "단일어", "낮": "단일어", "물": "단일어", "강": "단일어", "산": "단일어", "별": "단일어", "꽃": "단일어", "바람": "단일어", "높다": "단일어", "먹다": "단일어", "얼굴": "단일어", "마음": "단일어", "소리": "단일어", "얼음": "단일어", "땅": "단일어", "불": "단일어", "새": "단일어", "잎": "단일어", "돌": "단일어", "작다": "단일어", "자다": "단일어", "기쁘다": "단일어", "바위": "단일어", "모래": "단일어",
+            "눈물": "합성어", "돌다리": "합성어", "밤나무": "합성어", "손바닥": "합성어", "길가": "합성어", "불국수": "합성어", "꼬마김밥": "합성어", "금도끼": "합성어", "나팔꽃": "합성어", "산기슭": "합성어", "꽃잎": "합성어", "물병": "합성어", "책가방": "합성어", "고무신": "합성어", "들국화": "합성어", "눈사람": "합성어", "앞치마": "합성어", "볶음밥": "합성어", "건너오다": "합성어", "뛰놀다": "합성어", "알아보다": "합성어", "집안": "합성어", "논밭": "합성어", "시어머니": "합성어", "손발": "합성어", "오르내리다": "합성어", "밤낮": "합성어", "봄가을": "합성어", "소나무": "합성어", "달빛": "합성어", "바닷가": "합성어", "국물": "합성어",
+            "지우개": "파생어", "풋사과": "파생어", "맨발": "파생어", "햇밤": "파생어", "군말": "파생어", "덮개": "파생어", "사냥꾼": "파생어", "덧신": "파생어", "헛고생": "파생어", "웃음": "파생어", "풋사랑": "파생어", "군살": "파생어", "날고기": "파생어", "잠보": "파생어", "멋쟁이": "파생어", "장난꾸러기": "파생어", "가위질": "파생어", "믿음": "파생어", "맨손": "파생어", "샛노랗다": "파생어", "짓밟다": "파생어", "치솟다": "파생어", "톱질": "파생어", "구경꾼": "파생어", "선생님": "파생어", "지붕": "파생어", "놀이": "파생어"
+        };
+
+        const QUIZ_QUESTIONS = [
+            {
+                type: 'OX',
+                question: "형태소는 홀로 쓰일 수 있는 가장 작은 말의 단위이다.",
+                answer: "X",
+                explanation: "홀로 쓰일 수 있는 가장 작은 말의 단위는 '단어'입니다. '형태소'는 뜻을 가진 가장 작은 말의 단위입니다."
+            },
+            {
+                type: 'OX',
+                question: "새로 생겨난 대상을 표현하기 위한 새말(신조어)의 제작은 언어의 낭비이므로, 가급적 새말을 만들지 않고 기존에 있던 단어들만을 엄격하게 제한하여 활용하는 태도가 올바르다.",
+                answer: "X",
+                explanation: "사회와 환경이 끊임없이 변화함에 따라 새로운 생각과 사물을 표현하기 위해 새말을 활발히 만들어 쓰는 것은 자연스럽고 창의적인 언어 활동입니다. 다만, 타인과의 소통을 방해하지 않는 선에서 적절히 사용하고, 순화해 나가는 균형 있는 태도가 중요합니다."
+            },
+            {
+                type: 'SHORT',
+                question: "'고기만두'는 실질적인 의미를 나타내는 중심 부분인 '고기'와 '만두'가 결합하여 만들어졌습니다. 이처럼 둘 이상의 어근이 결합하여 만들어진 단어를 무엇이라고 하나요?",
+                answer: "합성어",
+                explanation: "둘 이상의 어근이 결합하여 만들어진 단어는 '합성어'입니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "'감나무가 크다.'라는 문장에 대한 설명으로 알맞은 것은?",
+                options: [
+                    "총 2개의 단어로 이루어져 있다.",
+                    "총 4개의 형태소로 이루어져 있다.",
+                    "'가'는 혼자서도 쓰일 수 있는 자립 형태소이다.",
+                    "'크다'는 2개의 형태소로 나눌 수 있다.",
+                    "'감나무'는 더 이상 나누면 본래 뜻이 사라지는 단일어이다."
+                ],
+                answer: 3, // 0-based index for option 4
+                explanation: "'크다'는 뜻을 가진 가장 작은 단위인 '크-'와 '-다'라는 두 개의 형태소로 나눌 수 있습니다. 문장 전체의 단어는 3개, 형태소는 5개이며, '가'는 홀로 쓰일 수 없는 의존 형태소입니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "다음 중 밑줄 친 부분이 &lt;보기&gt;의 조건에 모두 해당하는 것은?<br><br><div class='bg-indigo-50 border border-indigo-100 p-4 rounded-xl mt-2 text-sm font-normal text-slate-700 flex flex-col gap-1'><span>• 홀로 쓰일 수 있는 형태소인가? → 아니요</span><span>• 실질적인 의미가 있는 형태소인가? → 예</span></div>",
+                options: [
+                    "우뚝 솟은 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>하늘</span>이 매우 푸르다.",
+                    "욕심 많은 동생이 밥을 맛있게 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>먹</span>는다.",
+                    "마당 한구석에 예쁜 꽃<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>이</span> 피었다.",
+                    "늦은 오후에 철수가 도서관<span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>에</span> 간다.",
+                    "사랑하는 <span class='border-b-4 border-amber-400 bg-amber-50 px-1.5 py-0.5 rounded font-semibold text-slate-800 shadow-sm'>우리</span>는 같은 학교에 다닌다."
+                ],
+                answer: 1, // index for '먹'
+                explanation: "'먹-'은 홀로 쓰일 수는 없지만 '음식을 입을 통하여 배 속에 들여보내다'라는 실질적인 의미를 가진 어근입니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "다음 단어들을 짜임에 따라 분류할 때, 그 연결이 바르지 않은 것은?",
+                options: [
+                    "바다, 하늘 - 단일어",
+                    "돌다리, 밤나무 - 합성어",
+                    "풋사과, 군말 - 파생어",
+                    "눈물, 그림말 - 합성어",
+                    "지우개, 손바닥 - 파생어"
+                ],
+                answer: 4, 
+                explanation: "'지우개'는 '지우-(어근) + -개(접사)'로 이루어진 파생어이지만, '손바닥'은 '손(어근) + 바닥(어근)'으로 이루어진 합성어입니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "다음 &lt;보기&gt;의 ㉠~㉤에 대한 설명으로 알맞지 않은 것은?<br><br><div class='bg-indigo-50 border border-indigo-100 p-4 rounded-xl mt-2 text-sm font-normal text-slate-700 flex flex-wrap justify-center gap-4'><span>㉠ 맨입</span><span>㉡ 덧신</span><span>㉢ 햇밤</span><span>㉣ 군말</span><span>㉤ 가위질</span></div>",
+                options: [
+                    "㉠의 '맨-'은 '다른 것이 없는'의 뜻을 더하는 접사이다.",
+                    "㉡의 '덧-'은 '거듭하여 입거나 신는'의 뜻을 더하는 접사이다.",
+                    "㉢의 '햇-'은 '그해에 새로 난'의 뜻을 더하는 접사이다.",
+                    "㉣의 '군-'은 '구워진'의 뜻을 더하는 접사이다.",
+                    "㉤의 '-질'은 '그 도구를 가지고 하는 일'의 뜻을 더하는 접사이다."
+                ],
+                answer: 3,
+                explanation: "㉣ '군말'의 '군-'은 '쓸데없는'의 뜻을 더하는 접사입니다. '구워진'의 뜻이 아닙니다. (예: 군밤의 '군-'은 '구운'의 뜻을 지닌 어근입니다.)"
+            },
+            {
+                type: 'MULTIPLE',
+                question: "새말에 대한 설명으로 알맞지 않은 것은?",
+                options: [
+                    "사회가 변화하면서 새로 생겨난 말이다.",
+                    "기존의 단어 형성 방법(합성, 파생)으로 만들어지기도 한다.",
+                    "단어의 첫 글자나 일부를 따서 만들기도 한다.",
+                    "외래어는 우리말이 아니므로 새말에 포함되지 않는다.",
+                    "외래어를 우리말로 다듬은 순화어도 새말에 속한다."
+                ],
+                answer: 3,
+                explanation: "새말에는 외국어를 그대로 가져와서 사용하는 '외래어'와 이를 다듬은 '순화어'가 모두 포함됩니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "새말 '아점(아침+점심)'과 가장 유사 단어 형성 방법으로 만들어진 단어는?",
+                options: [
+                    "붕어빵",
+                    "누리꾼",
+                    "라볶이",
+                    "그림말",
+                    "즉석 음식"
+                ],
+                answer: 2,
+                explanation: "'아점'은 단어의 일부를 따서 결합하는 새로운 단어 형성 방법으로 만들어졌습니다. '라볶이(라면+떡볶이)'도 이와 같은 방법으로 만들어진 새말입니다."
+            },
+            {
+                type: 'MULTIPLE',
+                question: "밑줄 친 단어의 짜임이 나머지 넷과 다른 하나는?",
+                options: [
+                    "매운 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>불국수</span>를 먹었다.",
+                    "소풍 때 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>꼬마김밥</span>을 쌌다.",
+                    "문자에 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>그림말</span>을 자주 쓴다.",
+                    "튼튼한 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>돌다리</span>를 건넜다.",
+                    "위기를 모면하려 <span class='underline decoration-indigo-500 decoration-2 font-bold text-indigo-700 bg-indigo-50 px-1 rounded'>잔머리</span>를 굴렸다."
+                ],
+                answer: 4,
+                explanation: "'잔머리(잔-+머리)'는 파생어이고, 나머지 불국수(불+국수), 꼬마김밥(꼬마+김밥), 그림말(그림+말), 돌다리(돌+다리)는 모두 두 어근이 결합한 합성어입니다."
+            }
+        ];
+
+        function switchTab(tabId) {
+            // Hide all
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Reset tab buttons
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                // Remove old classes entirely
+                el.classList.remove('active', 'bg-indigo-100', 'text-indigo-700', 'font-semibold', 'bg-white', 'text-blue-800', 'text-slate-500', 'hover:bg-slate-100');
+                el.classList.add('text-blue-100', 'font-medium', 'hover:bg-blue-700', 'hover:text-white');
+            });
+
+            // Show selected
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(tabId).classList.add('block');
+            
+            // Highlight button
+            const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+            if(activeBtn) {
+                activeBtn.classList.add('active', 'bg-white', 'text-blue-800', 'font-semibold');
+                activeBtn.classList.remove('text-blue-100', 'font-medium', 'hover:bg-blue-700', 'hover:text-white');
+            }
+
+            if(tabId === 'tab-game' && document.getElementById('word-pool').children.length === 0) {
+                loadGameSet(1);
+            }
         }
-      }
 
-      if (isCorrect) quizScore += 1;
-      
-      // 사용자 응답 기록 저장 (정오를 'O', 'X'로 표기)
-      userResponses.push({
-        response: recordedAnswer,
-        isCorrect: isCorrect ? 'O' : 'X'
-      });
+        let selectedWordElement = null;
+        let wordsRemaining = 0;
 
-      lucide.createIcons();
+        /* 새 게임(문장 분해) 상태 변수 */
+        let currentSetIndex = 1;
+        let currentSentenceIdx = 0;
 
-      // 해설 노출
-      const feedbackEl = document.getElementById('quiz-feedback');
-      if (isCorrect) {
-        feedbackEl.innerHTML = '<i data-lucide="check-circle" class="text-emerald-500 w-6 h-6"></i> <span class="text-emerald-700">정답입니다!</span>';
-      } else {
-        let shortAnsText = q.type === 'SHORT' ? ` (정답: ${q.answer})` : '';
-        feedbackEl.innerHTML = `<i data-lucide="x-circle" class="text-rose-500 w-6 h-6"></i> <span class="text-rose-700">아쉽네요!${shortAnsText}</span>`;
-      }
-      document.getElementById('quiz-explanation-text').innerHTML = `<strong>💡 해설:</strong> ${q.explanation}`;
-      document.getElementById('quiz-explanation-box').classList.remove('hidden');
-      lucide.createIcons();
-    }
+        function loadGameSet(setNum) {
+            // Reset UI
+            document.querySelectorAll('.game-set-btn').forEach((btn, index) => {
+                if (index + 1 === setNum) {
+                    btn.classList.replace('bg-white', 'bg-indigo-600');
+                    btn.classList.replace('text-slate-500', 'text-white');
+                    btn.classList.remove('border', 'border-slate-200', 'hover:bg-slate-50');
+                } else {
+                    btn.classList.replace('bg-indigo-600', 'bg-white');
+                    btn.classList.replace('text-white', 'text-slate-500');
+                    btn.classList.add('border', 'border-slate-200', 'hover:bg-slate-50');
+                }
+            });
 
-    function nextQuestion() {
-      quizCurrentQ += 1;
-      if (quizCurrentQ >= QUIZ_QUESTIONS.length) {
-        // 모든 문제 풀이 완료 -> 결과 화면 출력 및 데이터 전송
-        document.getElementById('quiz-main-screen').classList.add('hidden');
-        document.getElementById('result-student-info').textContent = `${studentInfo.grade}학년 ${studentInfo.classNum}반 ${studentInfo.num}번 ${studentInfo.name}`;
-        document.getElementById('total-questions-cnt').textContent = QUIZ_QUESTIONS.length;
-        document.getElementById('user-score').textContent = quizScore;
-        document.getElementById('quiz-score-card').classList.remove('hidden');
-        
-        sendDataToGoogleSheet();
-      } else {
-        showQuizQuestion();
-      }
-    }
+            currentSetIndex = setNum;
 
-    // 구글 스프레드시트로 기록 전송 (Apps Script 내부 API 전용 - 외부 URL 불필요)
-    function sendDataToGoogleSheet() {
-      const sendingMsg = document.getElementById('sending-msg');
-      sendingMsg.classList.remove('hidden');
-      sendingMsg.textContent = "결과를 전송 중입니다...";
-      sendingMsg.className = "text-indigo-600 font-bold mb-4";
+            if (setNum <= 3) {
+                // 단어 짜임 모드 표시
+                document.getElementById('game-mode-word').classList.remove('hidden');
+                document.getElementById('game-mode-sentence').classList.add('hidden');
+                document.getElementById('game-desc').textContent = "단어를 선택하고 알맞은 상자를 터치(클릭)해주세요!";
 
-      // 전송할 페이로드 데이터 조립
-      let payload = {
-        grade: studentInfo.grade,
-        classNum: studentInfo.classNum,
-        num: studentInfo.num,
-        name: studentInfo.name,
-        score: quizScore
-      };
+                const pool = document.getElementById('word-pool');
+                pool.innerHTML = '';
+                document.querySelectorAll('.word-container').forEach(c => c.innerHTML = '');
+                selectedWordElement = null;
 
-      // Q1 ~ Q10 응답과 정오 추가
-      userResponses.forEach((ans, index) => {
-        payload[`q${index + 1}_response`] = ans.response;
-        payload[`q${index + 1}_isCorrect`] = ans.isCorrect;
-      });
+                const words = WORD_SETS[setNum];
+                wordsRemaining = words.length;
 
-      // 💡 핵심: 앱스 스크립트 내부 통신 (URL이나 fetch 불필요, 외부 차단 원천 해결)
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(response) {
-            sendingMsg.textContent = "결과 전송이 완료되었습니다! 👏";
-            sendingMsg.className = "text-emerald-600 font-bold mb-4";
-          })
-          .withFailureHandler(function(error) {
-            console.error("데이터 전송 오류:", error);
-            sendingMsg.textContent = "결과 전송 중 오류가 발생했습니다: " + error.message;
-            sendingMsg.className = "text-rose-600 font-bold mb-4";
-          })
-          .submitData(payload); // 구글 앱스 스크립트의 submitData 함수를 직접 호출
-      } else {
-        // 앱스 스크립트 환경이 아닐 경우 (로컬 테스트 및 현재 우측 실습창)
-        console.log("전송될 데이터:", payload);
-        sendingMsg.textContent = "🚨 오류: 구글 웹 앱 환경이 아닙니다. 배포된 웹 앱 URL로 접속해 주세요.";
-        sendingMsg.className = "text-rose-600 font-bold mb-4 text-sm";
-      }
-    }
+                words.forEach(word => {
+                    const badge = document.createElement('div');
+                    badge.className = 'word-badge in-pool bg-white border border-indigo-200 text-slate-700 px-4 py-2 rounded-lg shadow-sm cursor-pointer hover:-translate-y-0.5 transition-all select-none font-medium';
+                    badge.textContent = word;
+                    badge.dataset.word = word;
+                    badge.onclick = () => handleWordClick(badge);
+                    pool.appendChild(badge);
+                });
+            } else {
+                // 문장 분해 모드 표시
+                document.getElementById('game-mode-word').classList.add('hidden');
+                document.getElementById('game-mode-sentence').classList.remove('hidden');
+                document.getElementById('game-desc').textContent = "단어와 형태소의 개수에 맞게 빈칸을 채워보세요!";
+                
+                currentSentenceIdx = 0;
+                startSentenceTask();
+            }
+        }
 
-    // 퀴즈 탭 첫 화면으로 완전히 리셋
-    function resetQuizToStart() {
-      document.getElementById('quiz-score-card').classList.add('hidden');
-      document.getElementById('quiz-intro-screen').classList.remove('hidden');
-      
-      // 초기 상태 복구
-      document.getElementById('sending-msg').classList.add('hidden');
-      document.getElementById('sending-msg').textContent = "결과를 전송 중입니다...";
-      document.getElementById('sending-msg').className = "text-indigo-600 font-bold mb-4 hidden";
-      
-      document.getElementById('stu-name').value = '';
-      document.getElementById('stu-num').value = '';
-    }
-  </script>
+        /* 문장 분해 게임 로직 (직접 입력 방식) */
+        function startSentenceTask() {
+            const sentence = SENTENCE_SETS[currentSetIndex][currentSentenceIdx];
+            document.getElementById('sg-target-sentence').textContent = sentence.text;
+            document.getElementById('sg-sentence-counter').textContent = `문장 ${currentSentenceIdx + 1} / 5`;
+            
+            // Setup Word Inputs
+            const wordContainer = document.getElementById('sg-word-inputs');
+            wordContainer.innerHTML = '';
+            sentence.words.forEach((w, i) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'w-16 sm:w-20 text-center font-bold border-2 border-indigo-200 rounded-lg py-2 focus:outline-none focus:border-indigo-500 text-indigo-900 bg-indigo-50';
+                input.dataset.idx = i;
+                wordContainer.appendChild(input);
+            });
+            document.getElementById('btn-check-words').disabled = false;
+            document.getElementById('btn-check-words').className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition-colors";
+            document.getElementById('sg-word-feedback').textContent = '';
+
+            // Reset Morpheme Box
+            const morphBox = document.getElementById('sg-morpheme-box');
+            morphBox.classList.add('opacity-50', 'pointer-events-none');
+            document.getElementById('sg-morpheme-inputs').innerHTML = '';
+            document.getElementById('sg-morpheme-feedback').textContent = '';
+        }
+
+        function checkWords() {
+            const sentence = SENTENCE_SETS[currentSetIndex][currentSentenceIdx];
+            const inputs = document.querySelectorAll('#sg-word-inputs input');
+            let allCorrect = true;
+            inputs.forEach(input => {
+                const idx = input.dataset.idx;
+                if (input.value.trim() === sentence.words[idx]) {
+                    input.classList.remove('border-red-400', 'bg-red-100', 'text-red-700');
+                    input.classList.add('border-green-500', 'bg-green-100', 'text-green-800');
+                } else {
+                    input.classList.add('border-red-400', 'bg-red-100', 'text-red-700');
+                    input.classList.remove('border-green-500', 'bg-green-100', 'text-green-800');
+                    allCorrect = false;
+                }
+            });
+
+            const feedback = document.getElementById('sg-word-feedback');
+            if (allCorrect) {
+                feedback.textContent = "정답입니다! 2단계를 진행하세요.";
+                feedback.className = "text-green-600 font-bold mt-2 text-center text-sm h-5 fade-in block";
+                inputs.forEach(i => i.disabled = true);
+                
+                const btn = document.getElementById('btn-check-words');
+                btn.disabled = true;
+                btn.className = "w-full bg-green-500 text-white font-bold py-2.5 rounded-lg transition-colors cursor-default";
+                btn.textContent = "완료";
+                
+                setupMorphemes();
+            } else {
+                feedback.textContent = "틀린 부분이 있습니다. 다시 확인해보세요.";
+                feedback.className = "text-red-500 font-bold mt-2 text-center text-sm h-5 wrong-shake block";
+                setTimeout(() => feedback.classList.remove('wrong-shake'), 400);
+            }
+        }
+
+        function setupMorphemes() {
+            const sentence = SENTENCE_SETS[currentSetIndex][currentSentenceIdx];
+            const morphBox = document.getElementById('sg-morpheme-box');
+            morphBox.classList.remove('opacity-50', 'pointer-events-none');
+            
+            const morphContainer = document.getElementById('sg-morpheme-inputs');
+            morphContainer.innerHTML = '';
+            sentence.morphemes.forEach((m, i) => {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'w-16 sm:w-20 text-center font-bold border-2 border-pink-200 rounded-lg py-2 focus:outline-none focus:border-pink-500 text-pink-900 bg-pink-50';
+                input.dataset.idx = i;
+                morphContainer.appendChild(input);
+            });
+            document.getElementById('btn-check-morphemes').disabled = false;
+            document.getElementById('btn-check-morphemes').className = "w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2.5 rounded-lg transition-colors";
+        }
+
+        function checkMorphemes() {
+            const sentence = SENTENCE_SETS[currentSetIndex][currentSentenceIdx];
+            const inputs = document.querySelectorAll('#sg-morpheme-inputs input');
+            let allCorrect = true;
+            inputs.forEach(input => {
+                const idx = input.dataset.idx;
+                if (input.value.trim() === sentence.morphemes[idx]) {
+                    input.classList.remove('border-red-400', 'bg-red-100', 'text-red-700');
+                    input.classList.add('border-green-500', 'bg-green-100', 'text-green-800');
+                } else {
+                    input.classList.add('border-red-400', 'bg-red-100', 'text-red-700');
+                    input.classList.remove('border-green-500', 'bg-green-100', 'text-green-800');
+                    allCorrect = false;
+                }
+            });
+
+            const feedback = document.getElementById('sg-morpheme-feedback');
+            if (allCorrect) {
+                feedback.textContent = "정답입니다! 다음 문장으로 넘어갑니다.";
+                feedback.className = "text-green-600 font-bold mt-2 text-center text-sm h-5 fade-in block";
+                inputs.forEach(i => i.disabled = true);
+                
+                const btn = document.getElementById('btn-check-morphemes');
+                btn.disabled = true;
+                btn.className = "w-full bg-green-500 text-white font-bold py-2.5 rounded-lg transition-colors cursor-default";
+                btn.textContent = "완료";
+                
+                setTimeout(() => {
+                    currentSentenceIdx++;
+                    if (currentSentenceIdx < 5) {
+                        startSentenceTask();
+                    } else {
+                        showGameComplete();
+                    }
+                }, 1200);
+            } else {
+                feedback.textContent = "오답입니다. 기호(-)도 정확히 입력했는지 확인하세요!";
+                feedback.className = "text-red-500 font-bold mt-2 text-center text-sm h-5 wrong-shake block";
+                setTimeout(() => feedback.classList.remove('wrong-shake'), 400);
+            }
+        }
+
+        function handleWordClick(badge) {
+            if (!badge.classList.contains('in-pool')) return;
+
+            // Deselect previous
+            if (selectedWordElement) {
+                selectedWordElement.classList.remove('ring-4', 'ring-indigo-400', 'scale-105');
+            }
+            
+            // Toggle off if clicking same
+            if (selectedWordElement === badge) {
+                selectedWordElement = null;
+                return;
+            }
+
+            // Select new
+            selectedWordElement = badge;
+            selectedWordElement.classList.add('ring-4', 'ring-indigo-400', 'scale-105');
+        }
+
+        function targetCategoryBox(categoryName, boxElement) {
+            if (!selectedWordElement) return;
+
+            const word = selectedWordElement.dataset.word;
+            const correctCategory = WORD_DICTIONARY[word];
+
+            if (categoryName === correctCategory) {
+                // Correct!
+                selectedWordElement.classList.remove('ring-4', 'ring-indigo-400', 'scale-105', 'in-pool', 'hover:-translate-y-0.5', 'cursor-pointer', 'shadow-sm', 'bg-white');
+                selectedWordElement.classList.add('bg-opacity-50', 'shadow-none', 'cursor-default', 'bg-white/50');
+                
+                // Color specific styling
+                if (categoryName === '단일어') selectedWordElement.classList.add('text-blue-800', 'border-blue-300');
+                if (categoryName === '합성어') selectedWordElement.classList.add('text-orange-800', 'border-orange-300');
+                if (categoryName === '파생어') selectedWordElement.classList.add('text-pink-800', 'border-pink-300');
+
+                boxElement.querySelector('.word-container').appendChild(selectedWordElement);
+                selectedWordElement.onclick = null; // remove listener
+                selectedWordElement = null;
+                wordsRemaining--;
+
+                if (wordsRemaining === 0) {
+                    showGameComplete();
+                }
+            } else {
+                // Wrong!
+                selectedWordElement.classList.add('wrong-shake', 'bg-red-50', 'text-red-600', 'border-red-400');
+                const temp = selectedWordElement;
+                setTimeout(() => {
+                    temp.classList.remove('wrong-shake', 'bg-red-50', 'text-red-600', 'border-red-400');
+                }, 400);
+            }
+        }
+
+        function showGameComplete() {
+            const modal = document.getElementById('game-complete-modal');
+            const content = document.getElementById('game-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeGameModal() {
+            const modal = document.getElementById('game-complete-modal');
+            const content = document.getElementById('game-modal-content');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        let userAnswers = new Array(QUIZ_QUESTIONS.length).fill(null);
+
+        function startQuiz() {
+            const grade = document.getElementById('s-grade').value.trim();
+            const cls = document.getElementById('s-class').value.trim();
+            const num = document.getElementById('s-num').value.trim();
+            const name = document.getElementById('s-name').value.trim();
+
+            if (!grade || !cls || !num || !name) {
+                // Custom visually appealing alert alternative
+                const btn = document.querySelector('#quiz-intro button');
+                const oldText = btn.textContent;
+                btn.textContent = "인적 사항을 모두 입력해주세요!";
+                btn.classList.replace('bg-indigo-600', 'bg-red-500');
+                setTimeout(() => {
+                    btn.textContent = oldText;
+                    btn.classList.replace('bg-red-500', 'bg-indigo-600');
+                }, 2000);
+                return;
+            }
+
+            document.getElementById('quiz-intro').classList.add('hidden');
+            document.getElementById('quiz-main').classList.remove('hidden');
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-questions-container');
+            container.innerHTML = '';
+
+            QUIZ_QUESTIONS.forEach((q, idx) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'bg-white border border-slate-200 rounded-xl p-5 shadow-sm';
+                
+                let qHtml = `<div class="font-bold text-lg text-slate-800 mb-4 flex items-start gap-2">
+                                <span class="bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-lg text-sm shrink-0 mt-0.5">${idx + 1}</span>
+                                <div>${q.question}</div>
+                             </div>`;
+
+                if (q.type === 'OX') {
+                    qHtml += `
+                        <div class="flex gap-4 max-w-sm mx-auto">
+                            <label class="flex-1 cursor-pointer group">
+                                <input type="radio" name="q${idx}" value="O" class="hidden" onchange="answerChanged(${idx}, 'O')">
+                                <div class="border-2 border-slate-200 rounded-xl py-6 text-center text-4xl font-black text-slate-400 group-hover:border-indigo-300 transition-colors ${userAnswers[idx] === 'O' ? '!border-indigo-500 !text-indigo-600 bg-indigo-50' : ''}" id="lbl-q${idx}-o">O</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer group">
+                                <input type="radio" name="q${idx}" value="X" class="hidden" onchange="answerChanged(${idx}, 'X')">
+                                <div class="border-2 border-slate-200 rounded-xl py-6 text-center text-4xl font-black text-slate-400 group-hover:border-indigo-300 transition-colors ${userAnswers[idx] === 'X' ? '!border-indigo-500 !text-indigo-600 bg-indigo-50' : ''}" id="lbl-q${idx}-x">X</div>
+                            </label>
+                        </div>
+                    `;
+                } else if (q.type === 'SHORT') {
+                    qHtml += `
+                        <input type="text" class="w-full border-2 border-slate-200 rounded-xl p-3 focus:border-indigo-500 outline-none text-slate-700 bg-slate-50 focus:bg-white transition-colors" placeholder="정답을 입력하세요" onkeyup="answerChanged(${idx}, this.value)" value="${userAnswers[idx] || ''}">
+                    `;
+                } else if (q.type === 'MULTIPLE') {
+                    qHtml += `<div class="space-y-2">`;
+                    q.options.forEach((opt, oIdx) => {
+                        const isChecked = userAnswers[idx] === oIdx;
+                        qHtml += `
+                            <label class="flex items-center gap-3 cursor-pointer p-3 border-2 border-slate-100 rounded-xl hover:bg-slate-50 transition-colors quiz-option relative">
+                                <input type="radio" name="q${idx}" value="${oIdx}" class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-slate-300" onchange="answerChanged(${idx}, ${oIdx})" ${isChecked ? 'checked' : ''}>
+                                <div class="text-slate-700 text-sm md:text-base flex-1 flex items-center leading-relaxed">
+                                    <span class="mr-2 font-bold text-slate-400 w-4">${oIdx + 1}.</span>
+                                    <span>${opt}</span>
+                                </div>
+                            </label>
+                        `;
+                    });
+                    qHtml += `</div>`;
+                }
+                
+                qDiv.innerHTML = qHtml;
+                container.appendChild(qDiv);
+            });
+            updateProgress();
+        }
+
+        function answerChanged(qIndex, val) {
+            userAnswers[qIndex] = val;
+            
+            // Visual update for OX (since we use custom divs)
+            if (QUIZ_QUESTIONS[qIndex].type === 'OX') {
+                const oDiv = document.getElementById(`lbl-q${qIndex}-o`);
+                const xDiv = document.getElementById(`lbl-q${qIndex}-x`);
+                oDiv.className = `border-2 rounded-xl py-6 text-center text-4xl font-black transition-colors ${val === 'O' ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-slate-200 text-slate-400 group-hover:border-indigo-300'}`;
+                xDiv.className = `border-2 rounded-xl py-6 text-center text-4xl font-black transition-colors ${val === 'X' ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-slate-200 text-slate-400 group-hover:border-indigo-300'}`;
+            }
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            let answered = userAnswers.filter(a => a !== null && a !== '').length;
+            document.getElementById('quiz-progress-text').textContent = answered;
+            
+            const btn = document.getElementById('btn-submit-quiz');
+            if (answered === QUIZ_QUESTIONS.length) {
+                btn.disabled = false;
+                btn.className = "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl transition-all shadow-md mt-4";
+                btn.textContent = "제출하기";
+            } else {
+                btn.disabled = true;
+                btn.className = "w-full bg-slate-300 text-slate-500 font-bold py-4 rounded-xl transition-all cursor-not-allowed mt-4";
+                btn.textContent = "모든 문제를 풀면 제출할 수 있습니다";
+            }
+        }
+
+        async function submitQuiz() {
+            const btn = document.getElementById('btn-submit-quiz');
+            btn.textContent = "채점 중...";
+            btn.disabled = true;
+
+            const date = new Date().toLocaleString('ko-KR');
+            const grade = document.getElementById('s-grade').value;
+            const cls = document.getElementById('s-class').value;
+            const num = document.getElementById('s-num').value;
+            const name = document.getElementById('s-name').value;
+            
+            let totalScore = 0;
+            let results = []; // For local rendering
+            let sheetDataRow = [date, grade, cls, num, name]; // Exact columns A~E
+            
+            QUIZ_QUESTIONS.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                let isCorrect = false;
+                let displayAns = uAns;
+                let ansKey = q.answer;
+
+                if (q.type === 'SHORT') {
+                    isCorrect = (String(uAns).replace(/\s+/g, '') === String(q.answer).replace(/\s+/g, ''));
+                } else if (q.type === 'MULTIPLE') {
+                    isCorrect = (uAns === q.answer);
+                    displayAns = (uAns + 1) + "번"; // 1-based for display
+                    ansKey = (q.answer + 1) + "번";
+                } else {
+                    isCorrect = (uAns === q.answer);
+                }
+                
+                const score = isCorrect ? 10 : 0; 
+                totalScore += score;
+                
+                // Add to sheet format: 답, 채점결과
+                sheetDataRow.push(displayAns);
+                sheetDataRow.push(isCorrect ? "O" : "X");
+
+                results.push({
+                    qNum: idx + 1,
+                    questionHtml: q.question,
+                    isCorrect,
+                    uAns: displayAns,
+                    ansKey: ansKey,
+                    exp: q.explanation
+                });
+            });
+            
+            sheetDataRow.push(totalScore); // Last column (총점)
+
+            // google.script.run을 이용한 내부 연동 방식으로 변경
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                // Apps Script 환경(웹 앱)에서 실행될 때
+                google.script.run
+                    .withSuccessHandler(function(response) {
+                        console.log("데이터 저장 성공:", response);
+                        showResults(grade, cls, num, name, totalScore, results);
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error("데이터 저장 실패:", error);
+                        console.warn("결과 저장 중 오류가 발생했습니다. 화면에 결과만 표시합니다.");
+                        showResults(grade, cls, num, name, totalScore, results);
+                    })
+                    .saveQuizResult(sheetDataRow); // Code.gs의 함수 직접 호출
+            } else {
+                // 일반 로컬 브라우저에서 단독으로 열었을 때 (시뮬레이션 처리)
+                console.log("Mock Submission (google.script.run not found). Payload:", sheetDataRow);
+                setTimeout(() => {
+                    showResults(grade, cls, num, name, totalScore, results);
+                }, 600);
+            }
+        }
+
+        function showResults(grade, cls, num, name, score, results) {
+            document.getElementById('quiz-main').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+
+            document.getElementById('result-student-info').textContent = `${grade}학년 ${cls}반 ${num}번 ${name}`;
+            
+            const scoreEl = document.getElementById('result-score');
+            // Animate score
+            let curr = 0;
+            const step = Math.ceil(score / 30) || 1;
+            const timer = setInterval(() => {
+                curr += step;
+                if(curr >= score) {
+                    curr = score;
+                    clearInterval(timer);
+                    if(score === 100) document.getElementById('result-message').textContent = "완벽합니다! 최고예요 🎉";
+                    else if (score >= 80) document.getElementById('result-message').textContent = "참 잘했어요! 오답을 확인해보세요 👍";
+                    else document.getElementById('result-message').textContent = "개념을 다시 한번 복습해볼까요? 💪";
+                }
+                scoreEl.textContent = curr;
+            }, 30);
+
+            // Render Reviews
+            const rContainer = document.getElementById('quiz-review-container');
+            rContainer.innerHTML = '';
+            
+            results.forEach(r => {
+                const borderClr = r.isCorrect ? 'border-green-200' : 'border-red-200';
+                const bgClr = r.isCorrect ? 'bg-green-50/30' : 'bg-red-50/30';
+                const icon = r.isCorrect 
+                    ? `<svg class="w-6 h-6 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`
+                    : `<svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+                
+                const div = document.createElement('div');
+                div.className = `border ${borderClr} ${bgClr} rounded-xl p-5`;
+                div.innerHTML = `
+                    <div class="flex items-start gap-3 mb-3">
+                        ${icon}
+                        <div class="font-bold text-slate-800 text-sm mt-0.5">${r.qNum}. ${r.questionHtml}</div>
+                    </div>
+                    <div class="ml-9 text-sm">
+                        <div class="flex gap-4 mb-2">
+                            <div class="text-slate-600">나의 답: <span class="font-semibold ${r.isCorrect ? 'text-green-700' : 'text-red-600 line-through'}">${r.uAns}</span></div>
+                            ${!r.isCorrect ? `<div class="text-slate-600">정답: <span class="font-bold text-green-700">${r.ansKey}</span></div>` : ''}
+                        </div>
+                        <div class="bg-white/80 p-3 rounded-lg text-slate-600 text-xs leading-relaxed border border-slate-100 shadow-sm">
+                            <span class="font-bold text-indigo-500">해설 |</span> ${r.exp}
+                        </div>
+                    </div>
+                `;
+                rContainer.appendChild(div);
+            });
+        }
+    </script>
 </body>
 </html>
